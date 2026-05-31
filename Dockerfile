@@ -13,6 +13,9 @@ FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
+# Install ffmpeg for video processing
+RUN apk add --no-cache ffmpeg
+
 # Install backend dependencies
 COPY backend/package*.json ./
 RUN npm install
