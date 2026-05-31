@@ -5,9 +5,17 @@
         android:icon="@drawable/ic_nav_home"
         android:title="Home" />
     <item
+        android:id="@+id/nav_following"
+        android:icon="@drawable/ic_nav_following"
+        android:title="Following" />
+    <item
         android:id="@+id/nav_explore"
         android:icon="@drawable/ic_nav_lens"
         android:title="Explore" />
+    <item
+        android:id="@+id/nav_history"
+        android:icon="@drawable/ic_nav_history"
+        android:title="History" />
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_nav_profile"

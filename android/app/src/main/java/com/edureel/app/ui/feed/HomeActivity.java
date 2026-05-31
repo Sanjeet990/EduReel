@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment;
 import com.edureel.app.R;
 import com.edureel.app.ui.explore.ExploreFragment;
 import com.edureel.app.ui.profile.ProfileFragment;
+import com.edureel.app.ui.profile.FollowingFragment;
+import com.edureel.app.ui.feed.HistoryFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
@@ -26,6 +28,10 @@ public class HomeActivity extends AppCompatActivity {
                 selectedFragment = new ExploreFragment();
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
+            } else if (itemId == R.id.nav_following) {
+                selectedFragment = new FollowingFragment();
+            } else if (itemId == R.id.nav_history) {
+                selectedFragment = new HistoryFragment();
             }
 
             if (selectedFragment != null) {
