@@ -1,6 +1,7 @@
 const Video = require('../models/videoModel');
 const Interaction = require('../models/interactionModel');
 const UserProfile = require('../models/userProfileModel');
+const VideoView = require('../models/videoViewModel');
 const { getRecommendedFeed } = require('../services/recommendationService');
 
 // @desc    Get video feed (recommended)
@@ -94,14 +95,25 @@ const viewVideo = async (req, res) => {
         const video = await Video.findById(req.params.id);
         if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
 
-        video.viewCount += 1;
-        await video.save();
-
         const completionRate = Math.min(1, watchedSeconds / video.durationSeconds);
-        
+        const now = new Date();
+        const interaction = await Interaction.findOne({ user: req.user._id, video: video._id });
+        const shouldCountView = !interaction?.lastViewedAt || (now - new Date(interaction.lastViewedAt)) >= (24 * 60 * 60 * 1000);
+
+        if (shouldCountView) {
+            video.viewCount += 1;
+            await video.save();
+            await VideoView.create({
+                user: req.user._id,
+                video: video._id,
+                subject: video.subject || '',
+                viewedAt: now
+            });
+        }
+
         await Interaction.findOneAndUpdate(
             { user: req.user._id, video: video._id },
-            { $set: { watchedSeconds, completionRate } },
+            { $set: { watchedSeconds, completionRate, lastViewedAt: shouldCountView ? now : (interaction?.lastViewedAt || now) } },
             { upsert: true, new: true }
         );
 
@@ -111,7 +123,6 @@ const viewVideo = async (req, res) => {
             if (completionRate >= 0.8) profile.xp += 10;
             else if (completionRate >= 0.5) profile.xp += 5;
 
-            const now = new Date();
             const lastActive = profile.lastActiveDate ? new Date(profile.lastActiveDate) : null;
             
             if (!lastActive) {

@@ -27,6 +27,8 @@ import com.edureel.app.utils.TokenManager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,6 +42,7 @@ public class WatchedFeedActivity extends AppCompatActivity {
     private TokenManager tokenManager;
     private ApiService apiService;
     private int currentPlayingIndex = -1;
+    private final Set<String> sessionViewReported = new HashSet<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -191,6 +194,7 @@ public class WatchedFeedActivity extends AppCompatActivity {
 
     private void playVideoAtPosition(int position) {
         if (currentPlayingIndex == position) return;
+        reportCurrentVideoProgress();
 
         Video video = videoAdapter.getVideoAt(position);
         if (video == null || video.getHlsUrl() == null) return;
@@ -227,6 +231,7 @@ public class WatchedFeedActivity extends AppCompatActivity {
                     public void onPlaybackStateChanged(int playbackState) {
                         if (playbackState == Player.STATE_READY) {
                             holder.progressBar.setVisibility(View.GONE);
+                            reportView(video, 3);
                         } else if (playbackState == Player.STATE_BUFFERING) {
                             holder.progressBar.setVisibility(View.VISIBLE);
                         }
@@ -243,6 +248,7 @@ public class WatchedFeedActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        reportCurrentVideoProgress();
         if (exoPlayer != null) exoPlayer.pause();
     }
 
@@ -256,9 +262,35 @@ public class WatchedFeedActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        reportCurrentVideoProgress();
         if (exoPlayer != null) {
             exoPlayer.release();
             exoPlayer = null;
         }
+    }
+
+    private void reportCurrentVideoProgress() {
+        if (currentPlayingIndex < 0) return;
+        Video currentVideo = videoAdapter.getVideoAt(currentPlayingIndex);
+        if (currentVideo == null || currentVideo.getId() == null || exoPlayer == null) return;
+        int watchedSeconds = Math.max(1, (int) (exoPlayer.getCurrentPosition() / 1000));
+        reportView(currentVideo, watchedSeconds);
+    }
+
+    private void reportView(Video video, int watchedSeconds) {
+        if (video == null || video.getId() == null) return;
+        if (watchedSeconds >= 3) {
+            sessionViewReported.add(video.getId());
+        } else if (sessionViewReported.contains(video.getId())) {
+            return;
+        }
+        Map<String, Integer> body = new java.util.HashMap<>();
+        body.put("watchedSeconds", watchedSeconds);
+        apiService.viewVideo(video.getId(), body).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {}
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {}
+        });
     }
 }

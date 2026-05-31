@@ -8,6 +8,7 @@ const interactionSchema = mongoose.Schema(
         saved: { type: Boolean, default: false },
         watchedSeconds: { type: Number, default: 0 },
         completionRate: { type: Number, default: 0 }, // 0.0 - 1.0
+        lastViewedAt: { type: Date, default: null },
     },
     { timestamps: true }
 );

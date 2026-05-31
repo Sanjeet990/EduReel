@@ -4,6 +4,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const { transcode } = require('../services/transcodeService');
 const fs = require('fs');
 const Comment = require('../models/commentModel');
+const VideoView = require('../models/videoViewModel');
 
 // @desc    Upload new video
 // @route   POST /api/admin/videos/upload
@@ -173,13 +174,54 @@ const getAnalytics = async (req, res) => {
         ]);
         const totalViews = videoStats[0] ? videoStats[0].totalViews : 0;
 
+        const viewsBySubjectRaw = await Video.aggregate([
+            { $match: { isActive: { $ne: false } } },
+            { $group: { _id: '$subject', views: { $sum: '$viewCount' } } },
+            { $project: { _id: 0, name: { $ifNull: ['$_id', 'Unknown'] }, value: '$views' } },
+            { $sort: { value: -1 } }
+        ]);
+
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setHours(0, 0, 0, 0);
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+        const viewsLast7DaysRaw = await VideoView.aggregate([
+            { $match: { viewedAt: { $gte: sevenDaysAgo } } },
+            {
+                $group: {
+                    _id: {
+                        y: { $year: '$viewedAt' },
+                        m: { $month: '$viewedAt' },
+                        d: { $dayOfMonth: '$viewedAt' }
+                    },
+                    views: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const dayMap = new Map();
+        viewsLast7DaysRaw.forEach((row) => {
+            const key = `${row._id.y}-${String(row._id.m).padStart(2, '0')}-${String(row._id.d).padStart(2, '0')}`;
+            dayMap.set(key, row.views);
+        });
+        const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const viewsLast7Days = [];
+        for (let i = 0; i < 7; i += 1) {
+            const dt = new Date(sevenDaysAgo);
+            dt.setDate(sevenDaysAgo.getDate() + i);
+            const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+            viewsLast7Days.push({ name: weekday[dt.getDay()], views: dayMap.get(key) || 0 });
+        }
+
         res.json({
             success: true,
             data: {
                 totalUsers,
                 totalVideos,
                 activeSubscribers,
-                totalViews
+                totalViews,
+                viewsBySubject: viewsBySubjectRaw,
+                viewsLast7Days
             }
         });
     } catch (error) {

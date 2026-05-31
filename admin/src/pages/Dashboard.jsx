@@ -35,23 +35,8 @@ const Dashboard = () => {
         return <div className="flex h-full items-center justify-center text-accent">Loading dashboard...</div>;
     }
 
-    // Mock chart data (in real app, this would come from the backend)
-    const viewsData = [
-        { name: 'Mon', views: 4000 },
-        { name: 'Tue', views: 3000 },
-        { name: 'Wed', views: 2000 },
-        { name: 'Thu', views: 2780 },
-        { name: 'Fri', views: 1890 },
-        { name: 'Sat', views: 2390 },
-        { name: 'Sun', views: 3490 },
-    ];
-
-    // Calculate subject breakdown from videos
-    const subjectCounts = videos.reduce((acc, video) => {
-        acc[video.subject] = (acc[video.subject] || 0) + video.viewCount;
-        return acc;
-    }, {});
-    const pieData = Object.keys(subjectCounts).map(key => ({ name: key, value: subjectCounts[key] })).filter(d => d.value > 0);
+    const viewsData = stats?.viewsLast7Days || [];
+    const pieData = stats?.viewsBySubject || [];
 
     // Top 5 Videos
     const topVideos = [...videos].sort((a, b) => b.viewCount - a.viewCount).slice(0, 5);
