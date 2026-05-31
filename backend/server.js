@@ -63,8 +63,12 @@ app.use('/api', commentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/metadata', metadataRoutes);
 
-app.get('/', (req, res) => {
-    res.send('EduReel API is running');
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, 'frontend_dist')));
+
+// SPA fallback for any route not caught by API or static files
+app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend_dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
