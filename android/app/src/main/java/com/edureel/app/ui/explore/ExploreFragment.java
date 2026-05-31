@@ -46,8 +46,8 @@ public class ExploreFragment extends Fragment {
         rvTrending = view.findViewById(R.id.rvTrending);
         progressBar = view.findViewById(R.id.progressBar);
 
-        // 2x2 grid for subjects
-        rvSubjects.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        // 3 columns for subjects
+        rvSubjects.setLayoutManager(new GridLayoutManager(getContext(), 3));
         subjectAdapter = new SubjectAdapter();
         rvSubjects.setAdapter(subjectAdapter);
 
@@ -57,6 +57,19 @@ public class ExploreFragment extends Fragment {
         rvTrending.setAdapter(trendingAdapter);
 
         apiService = ApiClient.getClient(new TokenManager(requireContext())).create(ApiService.class);
+
+        // Set click listeners
+        subjectAdapter.setOnSubjectClickListener(subject -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), ExploreFeedActivity.class);
+            intent.putExtra("subject", subject.getName());
+            startActivity(intent);
+        });
+
+        trendingAdapter.setOnVideoClickListener(video -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), ExploreFeedActivity.class);
+            intent.putExtra("isTrending", true);
+            startActivity(intent);
+        });
 
         loadSubjects();
         loadTrendingVideos();
@@ -83,7 +96,7 @@ public class ExploreFragment extends Fragment {
 
     private void loadTrendingVideos() {
         progressBar.setVisibility(View.VISIBLE);
-        apiService.getExplore(null, null).enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getExplore(null, null, 20).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 progressBar.setVisibility(View.GONE);

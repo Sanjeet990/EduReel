@@ -43,7 +43,7 @@ public interface ApiService {
     Call<ApiResponse<List<Video>>> getFeed(@Query("page") int page, @Query("limit") int limit);
 
     @GET("videos/explore")
-    Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel);
+    Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel, @Query("limit") Integer limit);
 
     @POST("videos/{id}/view")
     Call<ApiResponse<Void>> viewVideo(@Path("id") String videoId, @Body Map<String, Integer> body);

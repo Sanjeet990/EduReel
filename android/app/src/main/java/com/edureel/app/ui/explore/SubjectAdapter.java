@@ -29,9 +29,23 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         return new ViewHolder(view);
     }
 
+    public interface OnSubjectClickListener {
+        void onSubjectClick(MetadataSubject subject);
+    }
+    
+    private OnSubjectClickListener listener;
+    
+    public void setOnSubjectClickListener(OnSubjectClickListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(subjects.get(position));
+        MetadataSubject subject = subjects.get(position);
+        holder.bind(subject);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onSubjectClick(subject);
+        });
     }
 
     @Override

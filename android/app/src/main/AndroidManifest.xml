@@ -41,6 +41,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         
+        <activity android:name=".ui.explore.ExploreFeedActivity" />
     </application>
 
 </manifest>

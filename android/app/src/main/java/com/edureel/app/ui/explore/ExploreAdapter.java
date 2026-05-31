@@ -28,9 +28,23 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.ViewHold
         return new ViewHolder(view);
     }
 
+    public interface OnVideoClickListener {
+        void onVideoClick(Video video);
+    }
+    
+    private OnVideoClickListener listener;
+    
+    public void setOnVideoClickListener(OnVideoClickListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(videos.get(position));
+        Video video = videos.get(position);
+        holder.bind(video);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onVideoClick(video);
+        });
     }
 
     @Override

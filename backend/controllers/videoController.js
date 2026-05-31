@@ -24,6 +24,7 @@ const getFeed = async (req, res) => {
 // @access  Public or Private
 const getExplore = async (req, res) => {
     const { subject, classLevel, search } = req.query;
+    const limit = parseInt(req.query.limit) || 50;
     
     let query = { status: 'ready', isActive: true };
     if (subject) query.subject = subject;
@@ -33,7 +34,7 @@ const getExplore = async (req, res) => {
     try {
         const videos = await Video.find(query)
             .sort({ viewCount: -1 })
-            .limit(50)
+            .limit(limit)
             .populate('uploadedBy', 'name')
             .lean();
 
