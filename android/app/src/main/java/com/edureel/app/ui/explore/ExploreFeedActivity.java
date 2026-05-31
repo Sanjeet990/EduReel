@@ -196,6 +196,10 @@ public class ExploreFeedActivity extends AppCompatActivity {
         loadVideos();
     }
 
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private boolean hasMorePages = true;
+
     private void setupViewPager() {
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -206,64 +210,87 @@ public class ExploreFeedActivity extends AppCompatActivity {
                 if (videoAdapter != null && videoAdapter.getItemCount() > 0) {
                     VideoPreloader.prefetchSurroundingVideos(ExploreFeedActivity.this, videoAdapter.getVideos(), position);
                 }
+
+                if (position >= videoAdapter.getItemCount() - 3 && !isLoading && hasMorePages) {
+                    currentPage++;
+                    loadVideos();
+                }
             }
         });
     }
 
     private void loadVideos() {
+        isLoading = true;
         if (searchQuery != null && !searchQuery.isEmpty()) {
-            apiService.searchVideos(searchQuery, null).enqueue(new Callback<ApiResponse<List<Video>>>() {
+            apiService.searchVideos(searchQuery, 10, currentPage).enqueue(new Callback<ApiResponse<List<Video>>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                    isLoading = false;
                     if (response.isSuccessful() && response.body() != null) {
                         List<Video> videos = response.body().getData();
+                        hasMorePages = response.body().hasMore();
                         if (videos != null && !videos.isEmpty()) {
-                            videoAdapter.setVideos(videos);
-                            viewPager.setVisibility(View.VISIBLE);
-                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
-                            viewPager.post(() -> playVideoAtPosition(0));
-                        } else {
+                            if (currentPage == 1) {
+                                videoAdapter.setVideos(videos);
+                                viewPager.setVisibility(View.VISIBLE);
+                                if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                                viewPager.post(() -> playVideoAtPosition(0));
+                            } else {
+                                videoAdapter.addVideos(videos);
+                            }
+                        } else if (currentPage == 1) {
                             viewPager.setVisibility(View.GONE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Toast.makeText(ExploreFeedActivity.this, "Failed to load videos", Toast.LENGTH_SHORT).show();
-                        finish();
+                        if (currentPage == 1) finish();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                    isLoading = false;
                     Toast.makeText(ExploreFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (currentPage == 1) finish();
                 }
             });
         } else {
-            Integer limit = isTrending ? 20 : null; // Limit to 20 for trending, or all (50 by default in backend) for subject
-            apiService.getExplore(subject, null, limit).enqueue(new Callback<ApiResponse<List<Video>>>() {
+            Integer limit = isTrending ? 20 : 10;
+            apiService.getExplore(subject, null, limit, currentPage).enqueue(new Callback<ApiResponse<List<Video>>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                    isLoading = false;
                     if (response.isSuccessful() && response.body() != null) {
                         List<Video> videos = response.body().getData();
+                        hasMorePages = response.body().hasMore();
+                        // If it's trending, we cap it at 20, so we just set hasMorePages to false
+                        if (isTrending) hasMorePages = false;
+
                         if (videos != null && !videos.isEmpty()) {
-                            videoAdapter.setVideos(videos);
-                            viewPager.setVisibility(View.VISIBLE);
-                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
-                            viewPager.post(() -> playVideoAtPosition(0));
-                        } else {
+                            if (currentPage == 1) {
+                                videoAdapter.setVideos(videos);
+                                viewPager.setVisibility(View.VISIBLE);
+                                if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                                viewPager.post(() -> playVideoAtPosition(0));
+                            } else {
+                                videoAdapter.addVideos(videos);
+                            }
+                        } else if (currentPage == 1) {
                             viewPager.setVisibility(View.GONE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Toast.makeText(ExploreFeedActivity.this, "Failed to load videos", Toast.LENGTH_SHORT).show();
-                        finish();
+                        if (currentPage == 1) finish();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                    isLoading = false;
                     Toast.makeText(ExploreFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (currentPage == 1) finish();
                 }
             });
         }

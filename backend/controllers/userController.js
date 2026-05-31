@@ -52,11 +52,20 @@ const updateProfile = async (req, res) => {
 // @access  Private
 const getSaved = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalInteractions = await Interaction.countDocuments({ user: req.user._id, saved: true });
+
         const interactions = await Interaction.find({ user: req.user._id, saved: true })
             .populate({
                 path: 'video',
                 populate: { path: 'uploadedBy', select: 'name' }
-            });
+            })
+            .sort({ updatedAt: -1 })
+            .skip(skip)
+            .limit(limit);
         
         let videos = interactions.map(i => i.video).filter(v => v !== null);
 
@@ -82,7 +91,8 @@ const getSaved = async (req, res) => {
             return { ...vObj, uploader: uploaderInfo };
         });
 
-        res.json({ success: true, data: videos });
+        const hasMore = skip + interactions.length < totalInteractions;
+        res.json({ success: true, data: videos, hasMore });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -93,16 +103,28 @@ const getSaved = async (req, res) => {
 // @access  Private
 const getHistory = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
-        const interactions = await Interaction.find({
+        const query = {
             user: req.user._id,
             updatedAt: { $gte: startOfDay }
-        }).populate({
-            path: 'video',
-            populate: { path: 'uploadedBy', select: 'name' }
-        });
+        };
+
+        const totalInteractions = await Interaction.countDocuments(query);
+
+        const interactions = await Interaction.find(query)
+            .populate({
+                path: 'video',
+                populate: { path: 'uploadedBy', select: 'name' }
+            })
+            .sort({ updatedAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
         let videos = interactions.map(i => i.video).filter(v => v !== null);
 
@@ -128,7 +150,8 @@ const getHistory = async (req, res) => {
             return { ...vObj, uploader: uploaderInfo };
         });
 
-        res.json({ success: true, data: videos });
+        const hasMore = skip + interactions.length < totalInteractions;
+        res.json({ success: true, data: videos, hasMore });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -178,6 +178,10 @@ public class SavedFeedActivity extends AppCompatActivity {
         loadSavedVideos();
     }
 
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private boolean hasMorePages = true;
+
     private void setupViewPager() {
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -188,40 +192,51 @@ public class SavedFeedActivity extends AppCompatActivity {
                 if (videoAdapter != null && videoAdapter.getItemCount() > 0) {
                     VideoPreloader.prefetchSurroundingVideos(SavedFeedActivity.this, videoAdapter.getVideos(), position);
                 }
+
+                if (position >= videoAdapter.getItemCount() - 3 && !isLoading && hasMorePages) {
+                    currentPage++;
+                    loadSavedVideos();
+                }
             }
         });
     }
 
     private void loadSavedVideos() {
-        apiService.getSavedVideos().enqueue(new Callback<ApiResponse<List<Video>>>() {
+        isLoading = true;
+        apiService.getSavedVideos(currentPage, 10).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                isLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Video> videos = response.body().getData();
+                    hasMorePages = response.body().hasMore();
+                    
                     if (videos != null && !videos.isEmpty()) {
-                        videoAdapter.setLooping(true);
-                        videoAdapter.setVideos(videos);
-                        
-                        int middle = Integer.MAX_VALUE / 2;
-                        int offset = middle % videos.size();
-                        int targetPosition = middle - offset + startIndex;
-                        
-                        viewPager.setCurrentItem(targetPosition, false);
-                        viewPager.post(() -> playVideoAtPosition(targetPosition));
-                    } else {
+                        if (currentPage == 1) {
+                            videoAdapter.setLooping(false);
+                            videoAdapter.setVideos(videos);
+                            
+                            int targetPosition = startIndex;
+                            viewPager.setCurrentItem(targetPosition, false);
+                            viewPager.post(() -> playVideoAtPosition(targetPosition));
+                        } else {
+                            videoAdapter.addVideos(videos);
+                        }
+                    } else if (currentPage == 1) {
                         Toast.makeText(SavedFeedActivity.this, "No saved videos found", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 } else {
                     Toast.makeText(SavedFeedActivity.this, "Failed to load saved videos", Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (currentPage == 1) finish();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                isLoading = false;
                 Toast.makeText(SavedFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                finish();
+                if (currentPage == 1) finish();
             }
         });
     }

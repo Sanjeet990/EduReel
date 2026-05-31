@@ -146,8 +146,27 @@ const deleteVideo = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
     try {
-        const users = await User.find({}).populate('plan').select('-password');
-        res.json({ success: true, data: users });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const users = await User.find({})
+            .populate('plan')
+            .select('-password')
+            .skip(skip)
+            .limit(limit);
+
+        const total = await User.countDocuments({});
+
+        res.json({ 
+            success: true, 
+            data: users,
+            pagination: {
+                total,
+                page,
+                pages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

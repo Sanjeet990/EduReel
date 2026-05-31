@@ -43,10 +43,10 @@ public interface ApiService {
     Call<ApiResponse<List<Video>>> getFeed(@Query("page") int page, @Query("limit") int limit);
 
     @GET("videos/explore")
-    Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel, @Query("limit") Integer limit);
+    Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel, @Query("limit") Integer limit, @Query("page") Integer page);
 
     @GET("videos/search")
-    Call<ApiResponse<List<Video>>> searchVideos(@Query("q") String query, @Query("limit") Integer limit);
+    Call<ApiResponse<List<Video>>> searchVideos(@Query("q") String query, @Query("limit") Integer limit, @Query("page") Integer page);
 
     @POST("videos/{id}/view")
     Call<ApiResponse<Void>> viewVideo(@Path("id") String videoId, @Body Map<String, Integer> body);
@@ -81,10 +81,10 @@ public interface ApiService {
     Call<ApiResponse<UserProfile>> uploadAvatar(@Part MultipartBody.Part avatar);
     
     @GET("users/saved")
-    Call<ApiResponse<List<Video>>> getSavedVideos();
+    Call<ApiResponse<List<Video>>> getSavedVideos(@Query("page") Integer page, @Query("limit") Integer limit);
 
     @GET("users/history")
-    Call<ApiResponse<List<Video>>> getHistory();
+    Call<ApiResponse<List<Video>>> getHistory(@Query("page") Integer page, @Query("limit") Integer limit);
 
     @GET("users/progress")
     Call<ApiResponse<Map<String, Object>>> getProgress();

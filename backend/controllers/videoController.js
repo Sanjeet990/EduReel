@@ -24,7 +24,9 @@ const getFeed = async (req, res) => {
 // @access  Public or Private
 const getExplore = async (req, res) => {
     const { subject, classLevel, search } = req.query;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
     
     let query = { status: 'ready', isActive: true };
     if (subject) query.subject = subject;
@@ -32,8 +34,11 @@ const getExplore = async (req, res) => {
     if (search) query.title = { $regex: search, $options: 'i' };
 
     try {
+        const totalVideos = await Video.countDocuments(query);
+
         const videos = await Video.find(query)
             .sort({ viewCount: -1 })
+            .skip(skip)
             .limit(limit)
             .populate('uploadedBy', 'name')
             .lean();
@@ -90,7 +95,8 @@ const getExplore = async (req, res) => {
             };
         });
 
-        res.json({ success: true, data: finalVideos });
+        const hasMore = skip + videos.length < totalVideos;
+        res.json({ success: true, data: finalVideos, hasMore });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -101,7 +107,9 @@ const getExplore = async (req, res) => {
 // @access  Public or Private
 const searchVideos = async (req, res) => {
     const { q } = req.query;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
 
     if (!q) {
         return res.status(400).json({ success: false, message: 'Search query is required' });
@@ -114,8 +122,11 @@ const searchVideos = async (req, res) => {
     ];
 
     try {
+        const totalVideos = await Video.countDocuments(query);
+
         const videos = await Video.find(query)
             .sort({ viewCount: -1 })
+            .skip(skip)
             .limit(limit)
             .populate('uploadedBy', 'name')
             .lean();
@@ -172,7 +183,8 @@ const searchVideos = async (req, res) => {
             };
         });
 
-        res.json({ success: true, data: finalVideos });
+        const hasMore = skip + videos.length < totalVideos;
+        res.json({ success: true, data: finalVideos, hasMore });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -7,18 +7,23 @@ const Users = () => {
     const [users, setUsers] = useState([]);
     const [deleteModalUserId, setDeleteModalUserId] = useState(null);
     const [preferenceModalUserId, setPreferenceModalUserId] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await api.get('/admin/users');
+                const res = await api.get(`/admin/users?page=${page}&limit=10`);
                 setUsers(res.data.data);
+                if (res.data.pagination) {
+                    setPagination(res.data.pagination);
+                }
             } catch (err) {
                 console.error(err);
             }
         };
         fetchUsers();
-    }, []);
+    }, [page]);
 
     const handleDelete = (id) => {
         setDeleteModalUserId(id);
@@ -44,8 +49,8 @@ const Users = () => {
                     Create New User
                 </Link>
             </div>
-            <div className="bg-bg-surface border border-border rounded-xl p-6">
-                <div className="overflow-x-auto">
+            <div className="bg-bg-surface border border-border rounded-xl p-6 flex flex-col min-h-[500px]">
+                <div className="overflow-x-auto flex-grow">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="text-gray-400 border-b border-border">
@@ -105,6 +110,27 @@ const Users = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="mt-6 flex justify-between items-center text-sm text-gray-400 border-t border-border pt-4">
+                    <span>Showing {(pagination.page - 1) * 10 + 1} to {Math.min(pagination.page * 10, pagination.total)} of {pagination.total} Users</span>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setPage(Math.max(1, page - 1))}
+                            disabled={page === 1}
+                            className={`px-3 py-1.5 rounded-lg ${page === 1 ? 'bg-bg-surface text-gray-500 cursor-not-allowed' : 'bg-bg-elevated hover:bg-border text-white transition-colors'}`}
+                        >
+                            Previous
+                        </button>
+                        <button 
+                            onClick={() => setPage(Math.min(pagination.pages, page + 1))}
+                            disabled={page === pagination.pages || pagination.pages === 0}
+                            className={`px-3 py-1.5 rounded-lg ${page === pagination.pages || pagination.pages === 0 ? 'bg-bg-surface text-gray-500 cursor-not-allowed' : 'bg-bg-elevated hover:bg-border text-white transition-colors'}`}
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
 

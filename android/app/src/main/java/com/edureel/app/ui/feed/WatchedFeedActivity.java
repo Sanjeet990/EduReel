@@ -173,6 +173,10 @@ public class WatchedFeedActivity extends AppCompatActivity {
         loadWatchedVideos();
     }
 
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private boolean hasMorePages = true;
+
     private void setupViewPager() {
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -183,33 +187,47 @@ public class WatchedFeedActivity extends AppCompatActivity {
                 if (videoAdapter != null && videoAdapter.getItemCount() > 0) {
                     VideoPreloader.prefetchSurroundingVideos(WatchedFeedActivity.this, videoAdapter.getVideos(), position);
                 }
+
+                if (position >= videoAdapter.getItemCount() - 3 && !isLoading && hasMorePages) {
+                    currentPage++;
+                    loadWatchedVideos();
+                }
             }
         });
     }
 
     private void loadWatchedVideos() {
-        apiService.getHistory().enqueue(new Callback<ApiResponse<List<Video>>>() {
+        isLoading = true;
+        apiService.getHistory(currentPage, 10).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                isLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Video> videos = response.body().getData();
+                    hasMorePages = response.body().hasMore();
+                    
                     if (videos != null && !videos.isEmpty()) {
-                        videoAdapter.setVideos(videos);
-                        viewPager.post(() -> playVideoAtPosition(0));
-                    } else {
+                        if (currentPage == 1) {
+                            videoAdapter.setVideos(videos);
+                            viewPager.post(() -> playVideoAtPosition(0));
+                        } else {
+                            videoAdapter.addVideos(videos);
+                        }
+                    } else if (currentPage == 1) {
                         Toast.makeText(WatchedFeedActivity.this, "No videos watched today", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 } else {
                     Toast.makeText(WatchedFeedActivity.this, "Failed to load history", Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (currentPage == 1) finish();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                isLoading = false;
                 Toast.makeText(WatchedFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                finish();
+                if (currentPage == 1) finish();
             }
         });
     }
