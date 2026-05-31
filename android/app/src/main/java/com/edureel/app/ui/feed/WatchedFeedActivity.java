@@ -67,7 +67,12 @@ public class WatchedFeedActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                             Map<String, Object> data = response.body().getData();
                             boolean isLiked = Boolean.TRUE.equals(data.get("isLiked"));
-                            video.setLiked(isLiked);
+                            boolean wasLiked = video.isLiked();
+                            if (isLiked != wasLiked) {
+                                video.setLiked(isLiked);
+                                video.setLikeCount(video.getLikeCount() + (isLiked ? 1 : -1));
+                                tvLikeCount.setText(VideoAdapter.formatCount(video.getLikeCount()));
+                            }
                             if (isLiked) {
                                 btnLike.setColorFilter(android.graphics.Color.RED);
                             } else {
@@ -81,8 +86,12 @@ public class WatchedFeedActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onComment(Video video) {
+            public void onComment(Video video, TextView tvCommentCount) {
                 CommentBottomSheetFragment bottomSheet = new CommentBottomSheetFragment(video.getId());
+                bottomSheet.setOnCommentAddedListener(() -> {
+                    video.setCommentCount(video.getCommentCount() + 1);
+                    tvCommentCount.setText(VideoAdapter.formatCount(video.getCommentCount()));
+                });
                 bottomSheet.show(getSupportFragmentManager(), "CommentBottomSheet");
             }
 

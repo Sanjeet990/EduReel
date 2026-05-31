@@ -43,7 +43,9 @@ public class Video {
     public double getDurationSeconds() { return durationSeconds; }
     public int getViewCount() { return viewCount; }
     public int getLikeCount() { return likeCount; }
+    public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
     public int getCommentCount() { return commentCount; }
+    public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
     public int getShareCount() { return shareCount; }
     
     public boolean isLiked() { return isLiked; }

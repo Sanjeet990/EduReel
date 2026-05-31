@@ -28,7 +28,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     public interface OnVideoInteractionListener {
         void onLike(Video video, ImageView btnLike, TextView tvLikeCount);
-        void onComment(Video video);
+        void onComment(Video video, TextView tvCommentCount);
         void onShare(Video video);
         void onSave(Video video, ImageView btnSave);
         void onFollow(Video video, TextView btnFollow);
@@ -141,6 +141,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     public int getItemCount() {
         if (videos == null || videos.isEmpty()) return 0;
         return isLooping ? Integer.MAX_VALUE : videos.size();
+    }
+
+    public static String formatCount(int count) {
+        if (count >= 1000000) return String.format("%.1fM", count / 1000000.0);
+        if (count >= 1000) return String.format("%.1fK", count / 1000.0);
+        return String.valueOf(count);
     }
 
     public static class VideoViewHolder extends RecyclerView.ViewHolder {
@@ -256,7 +262,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             // Interactions
             if (listener != null) {
                 btnLike.setOnClickListener(v -> listener.onLike(video, btnLike, tvLikeCount));
-                btnComment.setOnClickListener(v -> listener.onComment(video));
+                btnComment.setOnClickListener(v -> listener.onComment(video, tvCommentCount));
                 btnShare.setOnClickListener(v -> listener.onShare(video));
                 if (btnSave != null) {
                     btnSave.setOnClickListener(v -> listener.onSave(video, btnSave));
@@ -367,11 +373,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     return true;
                 });
             }
-        }
-        private String formatCount(int count) {
-            if (count >= 1000000) return String.format("%.1fm", count / 1000000.0);
-            if (count >= 1000) return String.format("%.1fk", count / 1000.0);
-            return String.valueOf(count);
         }
 
         private void showHeartAnimation(View anchorView, float x, float y) {

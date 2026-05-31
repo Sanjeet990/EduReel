@@ -48,6 +48,15 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
     private boolean hasMorePages = true;
     private String currentUserId = "";
     private String parentCommentId = null;
+    private OnCommentAddedListener commentAddedListener;
+
+    public interface OnCommentAddedListener {
+        void onCommentAdded();
+    }
+
+    public void setOnCommentAddedListener(OnCommentAddedListener listener) {
+        this.commentAddedListener = listener;
+    }
 
     public CommentBottomSheetFragment(String videoId) {
         this.videoId = videoId;
@@ -202,6 +211,10 @@ public class CommentBottomSheetFragment extends BottomSheetDialogFragment {
                     currentPage = 1;
                     hasMorePages = true;
                     loadComments();
+                    
+                    if (commentAddedListener != null) {
+                        commentAddedListener.onCommentAdded();
+                    }
                 } else {
                     Toast.makeText(getContext(), "Failed to post comment", Toast.LENGTH_SHORT).show();
                 }

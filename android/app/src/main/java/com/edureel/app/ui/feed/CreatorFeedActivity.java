@@ -87,18 +87,16 @@ public class CreatorFeedActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                             Map<String, Object> data = response.body().getData();
                             boolean isLiked = Boolean.TRUE.equals(data.get("isLiked"));
-                            video.setLiked(isLiked);
+                            boolean wasLiked = video.isLiked();
+                            if (isLiked != wasLiked) {
+                                video.setLiked(isLiked);
+                                video.setLikeCount(video.getLikeCount() + (isLiked ? 1 : -1));
+                                tvLikeCount.setText(VideoAdapter.formatCount(video.getLikeCount()));
+                            }
                             if (isLiked) {
                                 btnLike.setColorFilter(getResources().getColor(android.R.color.holo_red_dark));
                             } else {
                                 btnLike.clearColorFilter();
-                            }
-                            // The backend also returns likeCount but the format might be double in Map, let's just stick to state.
-                            if (data.containsKey("likeCount")) {
-                                Object lc = data.get("likeCount");
-                                if (lc instanceof Number) {
-                                    tvLikeCount.setText(String.valueOf(((Number)lc).intValue()));
-                                }
                             }
                         }
                     }
@@ -108,8 +106,13 @@ public class CreatorFeedActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onComment(Video video) {
-                // Implement comment dialog
+            public void onComment(Video video, TextView tvCommentCount) {
+                CommentBottomSheetFragment bottomSheet = new CommentBottomSheetFragment(video.getId());
+                bottomSheet.setOnCommentAddedListener(() -> {
+                    video.setCommentCount(video.getCommentCount() + 1);
+                    tvCommentCount.setText(VideoAdapter.formatCount(video.getCommentCount()));
+                });
+                bottomSheet.show(getSupportFragmentManager(), "CommentBottomSheet");
             }
 
             @Override
