@@ -245,6 +245,32 @@ const deleteComment = async (req, res) => {
     }
 };
 
+// @desc    Edit comment text (moderation)
+// @route   PUT /api/admin/comments/:id
+// @access  Private/Admin
+const editComment = async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || !text.trim()) {
+            return res.status(400).json({ success: false, message: 'Comment text is required' });
+        }
+
+        const comment = await Comment.findByIdAndUpdate(
+            req.params.id,
+            { text: text.trim(), editedByAdmin: true },
+            { new: true, runValidators: true }
+        ).populate('user', 'name username profileImage');
+
+        if (!comment) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+
+        res.json({ success: true, data: comment, message: 'Comment updated successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     uploadVideo,
     getVideos,
@@ -254,5 +280,6 @@ module.exports = {
     updateUser,
     getAnalytics,
     getVideoComments,
-    deleteComment
+    deleteComment,
+    editComment
 };

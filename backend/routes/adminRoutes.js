@@ -11,7 +11,8 @@ const {
     updateUser,
     getAnalytics,
     getVideoComments,
-    deleteComment
+    deleteComment,
+    editComment
 } = require('../controllers/adminController');
 
 // All routes here are admin only
@@ -26,6 +27,7 @@ router.route('/videos/:id')
     .delete(deleteVideo);
 
 router.get('/videos/:id/comments', getVideoComments);
+router.put('/comments/:id', editComment);
 router.delete('/comments/:id', deleteComment);
 
 // Users

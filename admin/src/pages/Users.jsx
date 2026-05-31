@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 
 const Users = () => {
@@ -33,7 +34,11 @@ const Users = () => {
                         <tbody>
                             {users.map(user => (
                                 <tr key={user._id} className="border-b border-border/50 hover:bg-bg-elevated transition-colors">
-                                    <td className="py-4 font-medium">{user.name}</td>
+                                    <td className="py-4 font-medium">
+                                        <Link to={`/users/${user._id}`} className="text-white hover:text-accent transition-colors">
+                                            {user.name}
+                                        </Link>
+                                    </td>
                                     <td className="py-4 text-gray-300">{user.email}</td>
                                     <td className="py-4">
                                         {user.plan ? (

@@ -19,6 +19,7 @@ const Videos = () => {
     const [uploadTitle, setUploadTitle] = useState('');
     const [uploadDescription, setUploadDescription] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [videoToDelete, setVideoToDelete] = useState(null);
@@ -167,6 +168,7 @@ const Videos = () => {
                 setSelectedFile(null);
                 setUploadTitle('');
                 setUploadDescription('');
+                setUploadModalOpen(false);
                 
             } catch (err) {
                 setError(err.response?.data?.message || 'Upload failed');
@@ -230,6 +232,12 @@ const Videos = () => {
         <div className="space-y-6 relative">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Videos</h1>
+                <button
+                    onClick={() => setUploadModalOpen(true)}
+                    className="bg-accent hover:bg-accent-light text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                >
+                    uopload
+                </button>
             </div>
 
             {error && (
@@ -239,7 +247,7 @@ const Videos = () => {
                 </div>
             )}
 
-            <div className="bg-bg-surface border border-border rounded-xl p-6">
+            {false && <div className="bg-bg-surface border border-border rounded-xl p-6">
                 <div className="flex space-x-4 mb-4">
                     <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-400 mb-1">Subject</label>
@@ -347,7 +355,7 @@ const Videos = () => {
                         {uploading ? 'Uploading...' : 'Upload Video'}
                     </button>
                 </div>
-            </div>
+            </div>}
 
             <div className="bg-bg-surface border border-border rounded-xl p-6">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
@@ -433,9 +441,9 @@ const Videos = () => {
                                         {video.status === 'failed' && <span className="flex items-center text-red-500 bg-red-500/10 px-2 py-1 rounded w-max text-xs font-medium"><AlertCircle className="w-3 h-3 mr-1"/> Failed</span>}
                                     </td>
                                     <td className="py-4 text-right whitespace-nowrap">
-                                        <Link to={`/videos/${video._id}/comments`} className="text-blue-500 hover:text-blue-400 mr-3 text-sm font-medium">Moderate</Link>
-                                        <button onClick={() => openEditModal(video)} className="text-accent hover:text-accent-light mr-3 text-sm font-medium">Edit</button>
-                                        <button onClick={() => openDeleteModal(video)} className="text-red-500 hover:text-red-400 text-sm font-medium">Delete</button>
+                                        <Link to={`/videos/${video._id}/comments`} className="inline-flex items-center px-3 py-1.5 rounded-md bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 text-xs font-semibold mr-2 transition-colors">Moderate</Link>
+                                        <button onClick={() => openEditModal(video)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-accent/15 text-accent hover:bg-accent/25 text-xs font-semibold mr-2 transition-colors">Edit</button>
+                                        <button onClick={() => openDeleteModal(video)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-red-500/15 text-red-400 hover:bg-red-500/25 text-xs font-semibold transition-colors">Delete</button>
                                     </td>
                                 </tr>
                             ))}
@@ -473,6 +481,74 @@ const Videos = () => {
                     </div>
                 )}
             </div>
+
+            {uploadModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-bg-surface border border-border rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-white">Upload Video</h2>
+                            <button onClick={() => setUploadModalOpen(false)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+                        </div>
+                        <div className="bg-bg-surface border border-border rounded-xl p-6">
+                            <div className="flex space-x-4 mb-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Subject</label>
+                                    <select className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accent" value={uploadSubject} onChange={(e) => setUploadSubject(e.target.value)} disabled={uploading}>
+                                        {metadata.subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Target Class</label>
+                                    <select className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accent" value={uploadClass} onChange={(e) => setUploadClass(e.target.value)} disabled={uploading}>
+                                        {metadata.classes.map(c => <option key={c.value} value={c.value}>{c.name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex space-x-4 mb-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Video Title <span className={uploadTitle.length > 100 ? 'text-red-500' : 'text-gray-500'}>({uploadTitle.length}/100)</span></label>
+                                    <input type="text" className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accent" placeholder="Enter video title (or leave blank to use filename)" value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)} disabled={uploading} maxLength={100} />
+                                </div>
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Description <span className={uploadDescription.length > 300 ? 'text-red-500' : 'text-gray-500'}>({uploadDescription.length}/300)</span></label>
+                                <textarea className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accent h-24 resize-none" placeholder="Add a description or caption..." value={uploadDescription} onChange={(e) => setUploadDescription(e.target.value)} disabled={uploading} maxLength={300}></textarea>
+                            </div>
+                            <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${isDragActive ? 'border-accent bg-accent/5' : 'border-border bg-bg hover:bg-bg-elevated'} ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <input {...getInputProps()} />
+                                {uploading ? (
+                                    <div>
+                                        <p className="text-accent font-medium mb-2">{statusMsg}</p>
+                                        <div className="w-full max-w-md mx-auto bg-bg-elevated rounded-full h-2 mb-2 border border-border">
+                                            <div className="bg-accent h-2 rounded-full" style={{ width: `${progress}%` }}></div>
+                                        </div>
+                                    </div>
+                                ) : selectedFile ? (
+                                    <div>
+                                        <CheckCircle className="w-12 h-12 mx-auto text-success mb-2" />
+                                        <p className="text-lg font-medium mb-1">{selectedFile.name}</p>
+                                        <p className="text-sm text-gray-400 mb-4">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                        <button onClick={(e) => { e.stopPropagation(); setSelectedFile(null); setUploadTitle(''); }} className="text-gray-400 hover:text-white text-sm underline">Choose a different file</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                                        <p className="text-lg font-medium mb-1">Select Video File</p>
+                                        <p className="text-sm text-gray-400">10-90 seconds • MP4</p>
+                                        <button className="mt-4 bg-bg-elevated hover:bg-border text-white px-6 py-2 rounded-lg font-medium transition-colors">Browse File</button>
+                                    </>
+                                )}
+                            </div>
+                            <div className="mt-6 flex justify-end gap-3">
+                                <button onClick={() => setUploadModalOpen(false)} className="px-4 py-2 rounded-lg bg-bg-elevated hover:bg-border text-white transition-colors">Close</button>
+                                <button onClick={startUpload} disabled={uploading || !selectedFile || uploadTitle.length > 100 || uploadDescription.length > 300} className="bg-accent hover:bg-accent-light text-white px-8 py-3 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    {uploading ? 'Uploading...' : 'Upload Video'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Modal */}
             {deleteModalOpen && (

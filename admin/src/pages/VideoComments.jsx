@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Trash2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trash2, AlertCircle, ChevronLeft, ChevronRight, Pencil, X } from 'lucide-react';
 
 const VideoComments = () => {
     const { id } = useParams();
@@ -13,6 +13,9 @@ const VideoComments = () => {
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [commentToDelete, setCommentToDelete] = useState(null);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [commentToEdit, setCommentToEdit] = useState(null);
+    const [editText, setEditText] = useState('');
 
     const fetchComments = useCallback(async () => {
         setLoading(true);
@@ -47,6 +50,24 @@ const VideoComments = () => {
         } catch (err) {
             console.error(err);
             alert('Failed to delete comment');
+        }
+    };
+
+    const openEditModal = (comment) => {
+        setCommentToEdit(comment);
+        setEditText(comment.text || '');
+        setEditModalOpen(true);
+    };
+
+    const confirmEdit = async () => {
+        try {
+            await api.put(`/admin/comments/${commentToEdit._id}`, { text: editText });
+            setEditModalOpen(false);
+            setCommentToEdit(null);
+            fetchComments();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to edit comment');
         }
     };
 
@@ -96,6 +117,9 @@ const VideoComments = () => {
                                     <tr key={comment._id} className="border-b border-border/50 hover:bg-bg-elevated transition-colors">
                                         <td className="py-4">
                                             <p className="text-white text-sm break-words">{comment.text}</p>
+                                            {comment.editedByAdmin && (
+                                                <span className="inline-flex mt-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-accent/20 text-accent">Edited by admin</span>
+                                            )}
                                         </td>
                                         <td className="py-4">
                                             <div className="flex items-center">
@@ -106,18 +130,16 @@ const VideoComments = () => {
                                                         {comment.user?.name?.charAt(0) || 'U'}
                                                     </div>
                                                 )}
-                                                <div>
-                                                    <p className="text-sm font-medium text-white">{comment.user?.name || 'Unknown'}</p>
-                                                    <p className="text-xs text-gray-400">@{comment.user?.username || 'user'}</p>
-                                                </div>
+                                                <Link to={`/users/${comment.user?._id}`} className="text-sm font-medium text-white hover:text-accent transition-colors">
+                                                    {comment.user?.name || 'Unknown'}
+                                                </Link>
                                             </div>
                                         </td>
                                         <td className="py-4 text-gray-300">{comment.likes}</td>
                                         <td className="py-4 text-gray-300 text-sm">{new Date(comment.createdAt).toLocaleDateString()}</td>
                                         <td className="py-4 text-right">
-                                            <button onClick={() => openDeleteModal(comment)} className="text-red-500 hover:text-red-400 p-2 rounded hover:bg-red-500/10 transition-colors">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            <button onClick={() => openEditModal(comment)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-accent/15 text-accent hover:bg-accent/25 text-xs font-semibold mr-2 transition-colors"><Pencil className="w-3 h-3 mr-1" />Edit</button>
+                                            <button onClick={() => openDeleteModal(comment)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-red-500/15 text-red-400 hover:bg-red-500/25 text-xs font-semibold transition-colors"><Trash2 className="w-3 h-3 mr-1" />Delete</button>
                                         </td>
                                     </tr>
                                 ))
@@ -167,6 +189,22 @@ const VideoComments = () => {
                         <div className="flex justify-end space-x-3">
                             <button onClick={() => setDeleteModalOpen(false)} className="px-4 py-2 rounded-lg bg-bg-elevated hover:bg-border text-white transition-colors">Cancel</button>
                             <button onClick={confirmDelete} className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {editModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-bg-surface border border-border p-6 rounded-xl shadow-xl w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-white">Edit Comment</h2>
+                            <button onClick={() => setEditModalOpen(false)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+                        </div>
+                        <textarea value={editText} onChange={(e) => setEditText(e.target.value)} className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-accent h-28 resize-none mb-6" />
+                        <div className="flex justify-end space-x-3">
+                            <button onClick={() => setEditModalOpen(false)} className="px-4 py-2 rounded-lg bg-bg-elevated hover:bg-border text-white transition-colors">Cancel</button>
+                            <button onClick={confirmEdit} className="px-4 py-2 rounded-lg bg-accent hover:bg-accent-light text-white transition-colors">Save</button>
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Videos from './pages/Videos';
 import VideoComments from './pages/VideoComments';
 import Users from './pages/Users';
+import UserProfile from './pages/UserProfile';
 import Plans from './pages/Plans';
 import Metadata from './pages/Metadata';
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="videos" element={<Videos />} />
           <Route path="videos/:id/comments" element={<VideoComments />} />
           <Route path="users" element={<Users />} />
+          <Route path="users/:id" element={<UserProfile />} />
           <Route path="plans" element={<Plans />} />
           <Route path="metadata" element={<Metadata />} />
           <Route path="*" element={<Navigate to="/" replace />} />
