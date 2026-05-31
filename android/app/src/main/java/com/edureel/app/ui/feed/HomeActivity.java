@@ -52,5 +52,16 @@ public class HomeActivity extends AppCompatActivity {
                 .replace(R.id.nav_host_fragment, new HomeFragment())
                 .commit();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (bottomNav.getSelectedItemId() != R.id.nav_home) {
+                    bottomNav.setSelectedItemId(R.id.nav_home);
+                } else {
+                    finish();
+                }
+            }
+        });
     }
 }
