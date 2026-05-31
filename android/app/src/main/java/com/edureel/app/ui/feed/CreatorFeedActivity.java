@@ -84,10 +84,22 @@ public class CreatorFeedActivity extends AppCompatActivity {
                 apiService.likeVideo(video.getId()).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<Map<String, Object>>> call, Response<ApiResponse<Map<String, Object>>> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            btnLike.setColorFilter(getResources().getColor(android.R.color.holo_red_dark));
-                            int currentCount = Integer.parseInt(tvLikeCount.getText().toString());
-                            tvLikeCount.setText(String.valueOf(currentCount + 1));
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            Map<String, Object> data = response.body().getData();
+                            boolean isLiked = Boolean.TRUE.equals(data.get("isLiked"));
+                            video.setLiked(isLiked);
+                            if (isLiked) {
+                                btnLike.setColorFilter(getResources().getColor(android.R.color.holo_red_dark));
+                            } else {
+                                btnLike.clearColorFilter();
+                            }
+                            // The backend also returns likeCount but the format might be double in Map, let's just stick to state.
+                            if (data.containsKey("likeCount")) {
+                                Object lc = data.get("likeCount");
+                                if (lc instanceof Number) {
+                                    tvLikeCount.setText(String.valueOf(((Number)lc).intValue()));
+                                }
+                            }
                         }
                     }
                     @Override
@@ -115,8 +127,15 @@ public class CreatorFeedActivity extends AppCompatActivity {
                 apiService.saveVideo(video.getId()).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<Map<String, Object>>> call, Response<ApiResponse<Map<String, Object>>> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            btnSave.setColorFilter(getResources().getColor(R.color.colorAccent));
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            Map<String, Object> data = response.body().getData();
+                            boolean isSaved = Boolean.TRUE.equals(data.get("isSaved"));
+                            video.setSaved(isSaved);
+                            if (isSaved) {
+                                btnSave.setColorFilter(getResources().getColor(R.color.colorAccent));
+                            } else {
+                                btnSave.clearColorFilter();
+                            }
                         }
                     }
                     @Override

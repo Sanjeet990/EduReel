@@ -138,6 +138,21 @@ const getRecommendedFeed = async (userId, page = 1, limit = 20) => {
         profileMap[p.user.toString()] = p.profileImage;
     });
 
+    // Fetch interactions for finalVideos to map liked and saved state
+    const finalVideoIds = finalVideos.map(v => v._id.toString());
+    const finalInteractions = await Interaction.find({
+        user: userId,
+        video: { $in: finalVideoIds }
+    });
+
+    const interactionsMap = {};
+    finalInteractions.forEach(interaction => {
+        interactionsMap[interaction.video.toString()] = {
+            isLiked: interaction.liked || false,
+            isSaved: interaction.saved || false
+        };
+    });
+
     return finalVideos.map(v => {
         let uploaderInfo = null;
         if (v.uploadedBy) {
@@ -148,7 +163,15 @@ const getRecommendedFeed = async (userId, page = 1, limit = 20) => {
                 isFollowing: followingList.includes(v.uploadedBy._id.toString())
             };
         }
-        return { ...v, uploader: uploaderInfo };
+        const videoIdStr = v._id.toString();
+        const interaction = interactionsMap[videoIdStr] || { isLiked: false, isSaved: false };
+
+        return { 
+            ...v, 
+            uploader: uploaderInfo,
+            isLiked: interaction.isLiked,
+            isSaved: interaction.isSaved
+        };
     });
 };
 

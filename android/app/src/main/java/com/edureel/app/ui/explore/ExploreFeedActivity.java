@@ -81,9 +81,15 @@ public class ExploreFeedActivity extends AppCompatActivity {
                 apiService.likeVideo(video.getId()).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<Map<String, Object>>> call, Response<ApiResponse<Map<String, Object>>> response) {
-                        if (response.isSuccessful()) {
-                            btnLike.setColorFilter(android.graphics.Color.RED);
-                            Toast.makeText(ExploreFeedActivity.this, "Liked!", Toast.LENGTH_SHORT).show();
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            Map<String, Object> data = response.body().getData();
+                            boolean isLiked = Boolean.TRUE.equals(data.get("isLiked"));
+                            video.setLiked(isLiked);
+                            if (isLiked) {
+                                btnLike.setColorFilter(android.graphics.Color.RED);
+                            } else {
+                                btnLike.clearColorFilter();
+                            }
                         }
                     }
                     @Override
@@ -111,9 +117,15 @@ public class ExploreFeedActivity extends AppCompatActivity {
                 apiService.saveVideo(video.getId()).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<Map<String, Object>>> call, Response<ApiResponse<Map<String, Object>>> response) {
-                        if (response.isSuccessful()) {
-                            btnSave.setColorFilter(android.graphics.Color.YELLOW);
-                            Toast.makeText(ExploreFeedActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                            Map<String, Object> data = response.body().getData();
+                            boolean isSaved = Boolean.TRUE.equals(data.get("isSaved"));
+                            video.setSaved(isSaved);
+                            if (isSaved) {
+                                btnSave.setColorFilter(android.graphics.Color.YELLOW);
+                            } else {
+                                btnSave.clearColorFilter();
+                            }
                         }
                     }
                     @Override

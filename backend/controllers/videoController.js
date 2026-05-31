@@ -48,11 +48,25 @@ const getExplore = async (req, res) => {
         });
 
         let followingList = [];
+        let interactionsMap = {};
         if (req.user) {
             const myProfile = await UserProfile.findOne({ user: req.user._id });
             if (myProfile && myProfile.following) {
                 followingList = myProfile.following.map(id => id.toString());
             }
+
+            const videoIds = videos.map(v => v._id.toString());
+            const userInteractions = await Interaction.find({
+                user: req.user._id,
+                video: { $in: videoIds }
+            });
+
+            userInteractions.forEach(interaction => {
+                interactionsMap[interaction.video.toString()] = {
+                    isLiked: interaction.liked || false,
+                    isSaved: interaction.saved || false
+                };
+            });
         }
 
         const finalVideos = videos.map(v => {
@@ -65,7 +79,15 @@ const getExplore = async (req, res) => {
                     isFollowing: followingList.includes(v.uploadedBy._id.toString())
                 };
             }
-            return { ...v, uploader: uploaderInfo };
+            const videoIdStr = v._id.toString();
+            const interaction = interactionsMap[videoIdStr] || { isLiked: false, isSaved: false };
+            
+            return { 
+                ...v, 
+                uploader: uploaderInfo,
+                isLiked: interaction.isLiked,
+                isSaved: interaction.isSaved
+            };
         });
 
         res.json({ success: true, data: finalVideos });

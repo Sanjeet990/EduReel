@@ -229,6 +229,20 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             tvLikeCount.setText(formatCount(video.getLikeCount()));
             tvCommentCount.setText(formatCount(video.getCommentCount()));
 
+            if (video.isLiked()) {
+                btnLike.setColorFilter(android.graphics.Color.RED);
+            } else {
+                btnLike.clearColorFilter();
+            }
+
+            if (btnSave != null) {
+                if (video.isSaved()) {
+                    btnSave.setColorFilter(android.graphics.Color.YELLOW);
+                } else {
+                    btnSave.clearColorFilter();
+                }
+            }
+
             // Interactions
             if (listener != null) {
                 btnLike.setOnClickListener(v -> listener.onLike(video, btnLike, tvLikeCount));
