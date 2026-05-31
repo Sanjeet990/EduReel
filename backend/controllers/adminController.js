@@ -5,6 +5,7 @@ const { transcode } = require('../services/transcodeService');
 const fs = require('fs');
 const Comment = require('../models/commentModel');
 const VideoView = require('../models/videoViewModel');
+const UserProfile = require('../models/userProfileModel');
 
 // @desc    Upload new video
 // @route   POST /api/admin/videos/upload
@@ -152,14 +153,114 @@ const getUsers = async (req, res) => {
     }
 };
 
+// @desc    Create user
+// @route   POST /api/admin/users
+// @access  Private/Admin
+const createUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!password) {
+            return res.status(400).json({ success: false, message: 'Password is required' });
+        }
+
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'User already exists with this email' });
+        }
+
+        const user = await User.create(req.body);
+        const createdUser = await User.findById(user._id).select('-password');
+
+        res.status(201).json({ success: true, data: createdUser });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get user by id
+// @route   GET /api/admin/users/:id
+// @access  Private/Admin
+const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).populate('plan').select('-password');
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        res.json({ success: true, data: user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // @desc    Update user
 // @route   PUT /api/admin/users/:id
 // @access  Private/Admin
 const updateUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password');
+        const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-        res.json({ success: true, data: user });
+
+        const { password, ...updateData } = req.body;
+        Object.assign(user, updateData);
+        
+        // If password is not empty, update it
+        if (password && password.trim() !== '') {
+            user.password = password;
+        }
+
+        await user.save();
+        
+        const updatedUser = await User.findById(user._id).select('-password');
+        res.json({ success: true, data: updatedUser });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        res.json({ success: true, message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get user preferences
+// @route   GET /api/admin/users/:id/preferences
+// @access  Private/Admin
+const getUserPreferences = async (req, res) => {
+    try {
+        let profile = await UserProfile.findOne({ user: req.params.id });
+        if (!profile) {
+            profile = { user: req.params.id, ageGroup: '', classLevel: null, subjects: [] };
+        }
+        res.json({ success: true, data: profile });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Update user preferences
+// @route   PUT /api/admin/users/:id/preferences
+// @access  Private/Admin
+const updateUserPreferences = async (req, res) => {
+    try {
+        const { ageGroup, classLevel, subjects } = req.body;
+        let profile = await UserProfile.findOne({ user: req.params.id });
+        
+        if (!profile) {
+            profile = new UserProfile({ user: req.params.id });
+        }
+        
+        if (ageGroup !== undefined) profile.ageGroup = ageGroup;
+        if (classLevel !== undefined) profile.classLevel = classLevel;
+        if (subjects !== undefined) profile.subjects = subjects;
+        
+        await profile.save();
+        res.json({ success: true, data: profile });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -325,7 +426,12 @@ module.exports = {
     updateVideo,
     deleteVideo,
     getUsers,
+    createUser,
+    getUserById,
     updateUser,
+    deleteUser,
+    getUserPreferences,
+    updateUserPreferences,
     getAnalytics,
     getVideoComments,
     deleteComment,

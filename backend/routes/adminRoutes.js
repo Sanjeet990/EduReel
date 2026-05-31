@@ -8,7 +8,12 @@ const {
     updateVideo,
     deleteVideo,
     getUsers,
+    createUser,
+    getUserById,
     updateUser,
+    deleteUser,
+    getUserPreferences,
+    updateUserPreferences,
     getAnalytics,
     getVideoComments,
     deleteComment,
@@ -32,9 +37,16 @@ router.delete('/comments/:id', deleteComment);
 
 // Users
 router.route('/users')
-    .get(getUsers);
+    .get(getUsers)
+    .post(createUser);
 router.route('/users/:id')
-    .put(updateUser);
+    .get(getUserById)
+    .put(updateUser)
+    .delete(deleteUser);
+
+router.route('/users/:id/preferences')
+    .get(getUserPreferences)
+    .put(updateUserPreferences);
 
 // Analytics
 router.get('/analytics', getAnalytics);
