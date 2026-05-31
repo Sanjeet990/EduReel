@@ -236,7 +236,7 @@ const Videos = () => {
                     onClick={() => setUploadModalOpen(true)}
                     className="bg-accent hover:bg-accent-light text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                 >
-                    uopload
+                    Upload Video
                 </button>
             </div>
 

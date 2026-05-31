@@ -73,10 +73,16 @@ const uploadVideo = async (req, res) => {
 // @access  Private/Admin
 const getVideos = async (req, res) => {
     try {
-        const { page = 1, limit = 10, subject, duration, search } = req.query;
+        const { page = 1, limit = 10, subject, targetClass, duration, search } = req.query;
         let query = { isActive: { $ne: false } };
 
         if (subject) query.subject = subject;
+        if (targetClass !== undefined && targetClass !== null && targetClass !== '') {
+            const parsedClass = Number(targetClass);
+            if (!Number.isNaN(parsedClass)) {
+                query.targetClass = parsedClass;
+            }
+        }
         if (search) query.title = { $regex: search, $options: 'i' };
         
         if (duration) {
