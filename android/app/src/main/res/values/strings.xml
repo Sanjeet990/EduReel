@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EduReel</string>
+    <string name="app_blocked_title">Access Restricted</string>
+    <string name="app_blocked_message">This application has been blocked. Please contact your administrator or check your usage settings to regain access.</string>
+    <string name="go_to_home">Exit to Home Screen</string>
+</resources>

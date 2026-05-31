@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.EduReel" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorPrimaryVariant">@color/colorAccentLight</item>
+        <item name="colorOnPrimary">@color/colorTextPrimary</item>
+        
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorSecondaryVariant">@color/colorAccentLight</item>
+        <item name="colorOnSecondary">@color/colorTextPrimary</item>
+        
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
+        
+        <!-- Background colors. -->
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorTextPrimary</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+        <item name="android:textColorHint">@color/colorTextHint</item>
+        
+        <!-- Fonts -->
+        <!-- <item name="android:fontFamily">@font/inter_regular</item> -->
+    </style>
+
+    <style name="Theme.EduReel.Splash" parent="Theme.EduReel">
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>

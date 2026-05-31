@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Android builds
+android/build/
+android/app/build/
+
+backend/public
+*.hprof

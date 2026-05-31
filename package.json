@@ -1,0 +1,16 @@
+{
+  "name": "edureel-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:backend": "npm install --prefix backend",
+    "install:admin": "npm install --prefix admin",
+    "install:all": "npm run install:backend && npm run install:admin",
+    "dev:backend": "npm --prefix backend start",
+    "dev:admin": "npm --prefix admin run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
