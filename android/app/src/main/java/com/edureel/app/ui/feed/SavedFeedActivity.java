@@ -190,9 +190,15 @@ public class SavedFeedActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Video> videos = response.body().getData();
                     if (videos != null && !videos.isEmpty()) {
+                        videoAdapter.setLooping(true);
                         videoAdapter.setVideos(videos);
-                        viewPager.setCurrentItem(startIndex, false);
-                        viewPager.post(() -> playVideoAtPosition(startIndex));
+                        
+                        int middle = Integer.MAX_VALUE / 2;
+                        int offset = middle % videos.size();
+                        int targetPosition = middle - offset + startIndex;
+                        
+                        viewPager.setCurrentItem(targetPosition, false);
+                        viewPager.post(() -> playVideoAtPosition(targetPosition));
                     } else {
                         Toast.makeText(SavedFeedActivity.this, "No saved videos found", Toast.LENGTH_SHORT).show();
                         finish();

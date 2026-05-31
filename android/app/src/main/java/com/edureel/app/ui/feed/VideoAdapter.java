@@ -37,6 +37,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     private List<Video> videos = new ArrayList<>();
     private OnVideoInteractionListener listener;
+    private boolean isLooping = false;
+
+    public void setLooping(boolean looping) {
+        this.isLooping = looping;
+    }
 
     public void setOnVideoInteractionListener(OnVideoInteractionListener listener) {
         this.listener = listener;
@@ -58,8 +63,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     public Video getVideoAt(int position) {
-        if (position >= 0 && position < videos.size()) {
-            return videos.get(position);
+        if (videos == null || videos.isEmpty()) return null;
+        int actualPosition = isLooping ? position % videos.size() : position;
+        if (actualPosition >= 0 && actualPosition < videos.size()) {
+            return videos.get(actualPosition);
         }
         return null;
     }
@@ -112,7 +119,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && payloads.contains("FOLLOW_UPDATE")) {
-            Video video = videos.get(position);
+            int actualPosition = isLooping && !videos.isEmpty() ? position % videos.size() : position;
+            Video video = videos.get(actualPosition);
             if (video.getUploader() != null) {
                 boolean isFollowing = FollowManager.getInstance().isFollowing(video.getUploader()._id, video.getUploader().isFollowing);
                 setFollowButtonUI(holder.btnFollow, isFollowing);
@@ -124,13 +132,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
-        Video video = videos.get(position);
+        int actualPosition = isLooping && !videos.isEmpty() ? position % videos.size() : position;
+        Video video = videos.get(actualPosition);
         holder.bind(video, listener);
     }
 
     @Override
     public int getItemCount() {
-        return videos.size();
+        if (videos == null || videos.isEmpty()) return 0;
+        return isLooping ? Integer.MAX_VALUE : videos.size();
     }
 
     public static class VideoViewHolder extends RecyclerView.ViewHolder {
@@ -282,7 +292,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
                     @Override
                     public boolean onDoubleTap(MotionEvent e) {
-                        if (btnLike != null) {
+                        if (btnLike != null && !video.isLiked()) {
                             btnLike.performClick();
                         }
                         showHeartAnimation(touchOverlay, e.getX(), e.getY());

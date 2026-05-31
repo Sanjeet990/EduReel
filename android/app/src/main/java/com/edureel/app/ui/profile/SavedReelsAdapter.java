@@ -54,11 +54,20 @@ public class SavedReelsAdapter extends RecyclerView.Adapter<SavedReelsAdapter.Vi
                 .error(android.R.color.holo_red_dark)
                 .into(holder.ivThumbnail);
 
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), SavedFeedActivity.class);
-            intent.putExtra("START_INDEX", position);
-            v.getContext().startActivity(intent);
-        });
+        View cardContainer = holder.itemView.findViewById(R.id.cardContainer);
+        if (cardContainer != null) {
+            cardContainer.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), SavedFeedActivity.class);
+                intent.putExtra("START_INDEX", position);
+                v.getContext().startActivity(intent);
+            });
+        } else {
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), SavedFeedActivity.class);
+                intent.putExtra("START_INDEX", position);
+                v.getContext().startActivity(intent);
+            });
+        }
     }
 
     @Override

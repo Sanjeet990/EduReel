@@ -60,9 +60,16 @@ public class VideoGridAdapter extends RecyclerView.Adapter<VideoGridAdapter.View
                 .error(android.R.color.holo_red_dark)
                 .into(holder.ivThumbnail);
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onVideoClick(video);
-        });
+        View cardContainer = holder.itemView.findViewById(R.id.cardContainer);
+        if (cardContainer != null) {
+            cardContainer.setOnClickListener(v -> {
+                if (listener != null) listener.onVideoClick(video);
+            });
+        } else {
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onVideoClick(video);
+            });
+        }
     }
 
     @Override
