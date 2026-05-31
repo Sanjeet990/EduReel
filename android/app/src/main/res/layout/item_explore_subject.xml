@@ -7,6 +7,9 @@
     android:padding="16dp"
     android:layout_margin="8dp"
     android:background="@drawable/bg_stat_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     android:clipToOutline="true">
 
     <TextView

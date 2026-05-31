@@ -54,12 +54,14 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.ViewHold
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvIcon, tvTitle, tvSubtitle;
+        ImageView ivThumbnail;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvIcon = itemView.findViewById(R.id.tvIcon);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvSubtitle = itemView.findViewById(R.id.tvSubtitle);
+            ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
         }
 
         void bind(Video video) {
@@ -86,6 +88,22 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.ViewHold
             else if (subject.toLowerCase().contains("biology")) icon = "🧬";
 
             tvIcon.setText(icon);
+
+            // Load thumbnail
+            if (video.getThumbnailUrl() != null && !video.getThumbnailUrl().isEmpty()) {
+                ivThumbnail.setVisibility(View.VISIBLE);
+                String url = video.getThumbnailUrl();
+                if (url.startsWith("/")) {
+                    url = "http://192.168.29.15:5000" + url;
+                }
+                Glide.with(itemView.getContext())
+                     .load(url)
+                     .transform(new com.bumptech.glide.load.resource.bitmap.CenterCrop(), new com.bumptech.glide.load.resource.bitmap.RoundedCorners(16))
+                     .into(ivThumbnail);
+            } else {
+                ivThumbnail.setVisibility(View.GONE);
+                Glide.with(itemView.getContext()).clear(ivThumbnail);
+            }
         }
     }
 }
