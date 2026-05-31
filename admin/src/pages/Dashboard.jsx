@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { BASE_URL } from '../utils/api';
 import { 
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell
@@ -103,7 +103,7 @@ const Dashboard = () => {
                                     <td className="py-4">
                                         <div className="flex items-center">
                                             {video.thumbnailUrl ? (
-                                                <img src={`http://localhost:5000${video.thumbnailUrl}`} alt="" className="w-10 h-10 rounded object-cover mr-3" />
+                                                <img src={`${BASE_URL}${video.thumbnailUrl}`} alt="" className="w-10 h-10 rounded object-cover mr-3" />
                                             ) : (
                                                 <div className="w-10 h-10 rounded bg-bg-elevated mr-3 flex items-center justify-center"><Video size={16} className="text-gray-500"/></div>
                                             )}

@@ -179,7 +179,7 @@ public class ProfileFragment extends Fragment {
         });
 
         // Load today's watched history count
-        apiService.getHistory().enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getHistory(1, 20).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -193,7 +193,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadSavedVideos() {
-        apiService.getSavedVideos().enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getSavedVideos(1, 20).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 if (response.isSuccessful() && response.body() != null) {

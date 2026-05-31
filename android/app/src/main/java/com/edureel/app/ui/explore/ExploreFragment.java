@@ -113,7 +113,7 @@ public class ExploreFragment extends Fragment {
 
     private void loadTrendingVideos() {
         progressBar.setVisibility(View.VISIBLE);
-        apiService.getExplore(null, null, 20).enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getExplore(null, null, 20, 1).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 progressBar.setVisibility(View.GONE);

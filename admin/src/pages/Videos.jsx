@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Link } from 'react-router-dom';
-import api from '../utils/api';
+import api, { BASE_URL } from '../utils/api';
 import { UploadCloud, CheckCircle, Clock, AlertCircle, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Videos = () => {
@@ -422,7 +422,7 @@ const Videos = () => {
                                     <td className="py-4">
                                         <div className="flex items-center">
                                             {video.thumbnailUrl && (
-                                                <img src={`http://localhost:5000${video.thumbnailUrl}`} alt="" className="w-10 h-10 rounded object-cover mr-3" />
+                                                <img src={`${BASE_URL}${video.thumbnailUrl}`} alt="" className="w-10 h-10 rounded object-cover mr-3" />
                                             )}
                                             <span className="font-medium truncate max-w-[200px]" title={video.title}>{video.title}</span>
                                         </div>

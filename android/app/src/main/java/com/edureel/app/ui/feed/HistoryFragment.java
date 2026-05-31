@@ -195,7 +195,7 @@ public class HistoryFragment extends Fragment {
     }
 
     private void loadWatchedVideos() {
-        apiService.getHistory().enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getHistory(1, 20).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 if (response.isSuccessful() && response.body() != null) {

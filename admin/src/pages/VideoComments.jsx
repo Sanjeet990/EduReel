@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../utils/api';
+import api, { BASE_URL } from '../utils/api';
 import { ArrowLeft, Trash2, AlertCircle, ChevronLeft, ChevronRight, Pencil, X } from 'lucide-react';
 
 const VideoComments = () => {
@@ -124,7 +124,7 @@ const VideoComments = () => {
                                         <td className="py-4">
                                             <div className="flex items-center">
                                                 {comment.user?.profileImage ? (
-                                                    <img src={`http://localhost:5000${comment.user.profileImage}`} alt="" className="w-8 h-8 rounded-full object-cover mr-2" />
+                                                    <img src={`${BASE_URL}${comment.user.profileImage}`} alt="" className="w-8 h-8 rounded-full object-cover mr-2" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-border mr-2 flex items-center justify-center text-xs">
                                                         {comment.user?.name?.charAt(0) || 'U'}
