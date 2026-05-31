@@ -44,7 +44,7 @@ public class ProfileFragment extends Fragment {
 
     private TextView tvAvatar, tvUsername, tvClassInfo;
     private android.widget.ImageView ivAvatar;
-    private TextView tvWatchedCount, tvSavedCount, tvFollowersCount, tvFollowingCount;
+    private TextView tvWatchedCount, tvFollowersCount, tvFollowingCount, tvSavedReelsHeader;
     private RecyclerView rvSavedReels;
     private SavedReelsAdapter adapter;
     private ApiService apiService;
@@ -91,9 +91,9 @@ public class ProfileFragment extends Fragment {
         tvUsername = view.findViewById(R.id.tvUsername);
         tvClassInfo = view.findViewById(R.id.tvClassInfo);
         tvWatchedCount = view.findViewById(R.id.tvWatchedCount);
-        tvSavedCount = view.findViewById(R.id.tvSavedCount);
         tvFollowersCount = view.findViewById(R.id.tvFollowersCount);
         tvFollowingCount = view.findViewById(R.id.tvFollowingCount);
+        tvSavedReelsHeader = view.findViewById(R.id.tvSavedReelsHeader);
         
         View cardWatched = view.findViewById(R.id.cardWatched);
         View cardFollowers = view.findViewById(R.id.cardFollowers);
@@ -198,7 +198,7 @@ public class ProfileFragment extends Fragment {
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Video> videos = response.body().getData();
-                    tvSavedCount.setText(String.valueOf(videos.size()));
+                    tvSavedReelsHeader.setText("Saved Reels (" + videos.size() + ")");
                     adapter.setVideos(videos);
                 }
             }

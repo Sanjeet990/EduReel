@@ -36,6 +36,10 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         });
 
+        bottomNav.setOnItemReselectedListener(item -> {
+            // Do nothing on tab reselect
+        });
+
         // Set default fragment
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()

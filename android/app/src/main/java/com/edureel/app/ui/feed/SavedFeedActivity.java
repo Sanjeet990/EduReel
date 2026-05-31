@@ -51,10 +51,14 @@ public class SavedFeedActivity extends AppCompatActivity {
             startIndex = getIntent().getIntExtra("START_INDEX", 0);
         }
 
+        viewPager = findViewById(R.id.viewPager);
+        
+        android.widget.ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
+
         tokenManager = new TokenManager(this);
         apiService = ApiClient.getClient(tokenManager).create(ApiService.class);
 
-        viewPager = findViewById(R.id.viewPager);
         videoAdapter = new VideoAdapter();
         videoAdapter.setOnVideoInteractionListener(new VideoAdapter.OnVideoInteractionListener() {
             @Override
@@ -122,12 +126,6 @@ public class SavedFeedActivity extends AppCompatActivity {
                             
                             if (actualStatus != newStatus && videoAdapter != null) {
                                 videoAdapter.updateFollowStatus(uploaderId, actualStatus);
-                            }
-                            
-                            if (actualStatus) {
-                                Toast.makeText(SavedFeedActivity.this, "Followed!", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(SavedFeedActivity.this, "Unfollowed", Toast.LENGTH_SHORT).show();
                             }
                         }
                     }

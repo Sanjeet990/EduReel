@@ -50,6 +50,10 @@ public class WatchedFeedActivity extends AppCompatActivity {
         apiService = ApiClient.getClient(tokenManager).create(ApiService.class);
 
         viewPager = findViewById(R.id.viewPager);
+        
+        android.widget.ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
+
         videoAdapter = new VideoAdapter();
         videoAdapter.setOnVideoInteractionListener(new VideoAdapter.OnVideoInteractionListener() {
             @Override
@@ -117,12 +121,6 @@ public class WatchedFeedActivity extends AppCompatActivity {
                             
                             if (actualStatus != newStatus && videoAdapter != null) {
                                 videoAdapter.updateFollowStatus(uploaderId, actualStatus);
-                            }
-                            
-                            if (actualStatus) {
-                                Toast.makeText(WatchedFeedActivity.this, "Followed!", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(WatchedFeedActivity.this, "Unfollowed", Toast.LENGTH_SHORT).show();
                             }
                         }
                     }

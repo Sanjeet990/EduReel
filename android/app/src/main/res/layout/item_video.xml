@@ -83,6 +83,7 @@
 
         <!-- Bottom Left: Details -->
         <LinearLayout
+            android:id="@+id/llDetails"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -179,10 +180,10 @@
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="16dp"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/llDetails"
             app:layout_constraintEnd_toEndOf="parent">
 
             <!-- Like -->

@@ -127,12 +127,6 @@ public class HomeFragment extends Fragment {
                             if (actualStatus != newStatus && videoAdapter != null) {
                                 videoAdapter.updateFollowStatus(uploaderId, actualStatus);
                             }
-                            
-                            if (actualStatus) {
-                                Toast.makeText(getContext(), "Followed!", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getContext(), "Unfollowed", Toast.LENGTH_SHORT).show();
-                            }
                         }
                     }
                     @Override
