@@ -212,6 +212,7 @@ public class ExploreFeedActivity extends AppCompatActivity {
                             videoAdapter.setVideos(videos);
                             viewPager.setVisibility(View.VISIBLE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                            viewPager.post(() -> playVideoAtPosition(0));
                         } else {
                             viewPager.setVisibility(View.GONE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
@@ -239,6 +240,7 @@ public class ExploreFeedActivity extends AppCompatActivity {
                             videoAdapter.setVideos(videos);
                             viewPager.setVisibility(View.VISIBLE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                            viewPager.post(() -> playVideoAtPosition(0));
                         } else {
                             viewPager.setVisibility(View.GONE);
                             if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);

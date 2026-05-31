@@ -186,6 +186,7 @@ public class WatchedFeedActivity extends AppCompatActivity {
                     List<Video> videos = response.body().getData();
                     if (videos != null && !videos.isEmpty()) {
                         videoAdapter.setVideos(videos);
+                        viewPager.post(() -> playVideoAtPosition(0));
                     } else {
                         Toast.makeText(WatchedFeedActivity.this, "No videos watched today", Toast.LENGTH_SHORT).show();
                         finish();

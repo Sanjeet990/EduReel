@@ -207,6 +207,7 @@ public class HomeFragment extends Fragment {
                     }
                     if (currentPage == 1) {
                         videoAdapter.setVideos(videos);
+                        viewPager.post(() -> playVideoAtPosition(0));
                     } else {
                         videoAdapter.addVideos(videos);
                     }

@@ -193,6 +193,7 @@ public class HistoryFragment extends Fragment {
                     List<Video> videos = response.body().getData();
                     if (videos != null && !videos.isEmpty()) {
                         videoAdapter.setVideos(videos);
+                        viewPager.post(() -> playVideoAtPosition(0));
                     } else {
                         if (getContext() != null) Toast.makeText(getContext(), "No videos watched", Toast.LENGTH_SHORT).show();
                     }

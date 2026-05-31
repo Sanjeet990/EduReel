@@ -192,6 +192,7 @@ public class SavedFeedActivity extends AppCompatActivity {
                     if (videos != null && !videos.isEmpty()) {
                         videoAdapter.setVideos(videos);
                         viewPager.setCurrentItem(startIndex, false);
+                        viewPager.post(() -> playVideoAtPosition(startIndex));
                     } else {
                         Toast.makeText(SavedFeedActivity.this, "No saved videos found", Toast.LENGTH_SHORT).show();
                         finish();

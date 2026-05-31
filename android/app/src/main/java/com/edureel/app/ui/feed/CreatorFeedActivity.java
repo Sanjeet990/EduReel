@@ -234,9 +234,11 @@ public class CreatorFeedActivity extends AppCompatActivity {
                                 }
                             }
                             viewPager.setCurrentItem(targetIndex, false);
+                            int finalTargetIndex = targetIndex;
+                            viewPager.post(() -> playVideoAt(finalTargetIndex));
                             isFirstLoad = false;
                         } else {
-                            playVideoAt(viewPager.getCurrentItem());
+                            viewPager.post(() -> playVideoAt(viewPager.getCurrentItem()));
                         }
                     } else {
                         Toast.makeText(CreatorFeedActivity.this, "No videos found", Toast.LENGTH_SHORT).show();
