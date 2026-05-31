@@ -190,7 +190,7 @@ public class PublicProfileActivity extends AppCompatActivity {
     }
 
     private void loadFollowing() {
-        apiService.getFollowing(targetUserId).enqueue(new Callback<ApiResponse<List<Map<String, String>>>>() {
+        apiService.getFollowing(targetUserId, 1, 20).enqueue(new Callback<ApiResponse<List<Map<String, String>>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Map<String, String>>>> call, Response<ApiResponse<List<Map<String, String>>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {

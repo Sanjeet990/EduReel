@@ -55,9 +55,10 @@ router.get('/history', getHistory);
 router.get('/progress', getProgress);
 router.get('/subscription', getSubscription);
 
-// Public profile & Following
+// Public profile & Following/Followers
 router.get('/:id/public-profile', getPublicProfile);
 router.post('/:id/follow', toggleFollow);
 router.get('/:id/following', getFollowing);
+router.get('/:id/followers', require('../controllers/userController').getFollowers);
 
 module.exports = router;

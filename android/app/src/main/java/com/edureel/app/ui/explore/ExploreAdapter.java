@@ -39,31 +39,39 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.ViewHold
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivThumbnail;
-        TextView tvTitle, tvSubject, tvViews;
+        TextView tvIcon, tvTitle, tvSubtitle;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
+            tvIcon = itemView.findViewById(R.id.tvIcon);
             tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvSubject = itemView.findViewById(R.id.tvSubject);
-            tvViews = itemView.findViewById(R.id.tvViews);
+            tvSubtitle = itemView.findViewById(R.id.tvSubtitle);
         }
 
         void bind(Video video) {
             tvTitle.setText(video.getTitle());
-            tvSubject.setText(video.getSubject() != null ? video.getSubject() : "");
+            String subject = video.getSubject() != null ? video.getSubject() : "General";
+            String classLevel = (video.getTargetClass() != null && !video.getTargetClass().isEmpty()) 
+                ? "Class " + video.getTargetClass().get(0) 
+                : "";
             
-            int views = video.getViewCount();
-            tvViews.setText(views > 1000 ? String.format("%.1fk views", views / 1000f) : views + " views");
+            String subtitle = subject;
+            if (!classLevel.isEmpty()) {
+                subtitle += " • " + classLevel;
+            }
+            tvSubtitle.setText(subtitle);
 
-            String url = video.getThumbnailUrl();
-            if (url != null && url.startsWith("/uploads")) {
-                url = "http://192.168.29.15:5000" + url;
-            }
-            if (url != null) {
-                Glide.with(itemView).load(url).into(ivThumbnail);
-            }
+            // Set emoji based on subject
+            String icon = "🌙"; // default
+            if (subject.toLowerCase().contains("math")) icon = "✏️";
+            else if (subject.toLowerCase().contains("science")) icon = "🔬";
+            else if (subject.toLowerCase().contains("code") || subject.toLowerCase().contains("computer")) icon = "💻";
+            else if (subject.toLowerCase().contains("history")) icon = "📜";
+            else if (subject.toLowerCase().contains("physics")) icon = "🌙";
+            else if (subject.toLowerCase().contains("chemistry")) icon = "🧪";
+            else if (subject.toLowerCase().contains("biology")) icon = "🧬";
+
+            tvIcon.setText(icon);
         }
     }
 }

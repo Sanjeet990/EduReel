@@ -34,6 +34,7 @@
         <activity android:name=".ui.common.BlockedActivity" />
         <activity android:name=".ui.feed.PublicProfileActivity" />
         <activity android:name=".ui.feed.CreatorFeedActivity" />
+        <activity android:name=".ui.profile.FollowListActivity" />
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

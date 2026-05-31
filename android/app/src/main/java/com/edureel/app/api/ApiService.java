@@ -94,5 +94,8 @@ public interface ApiService {
     Call<ApiResponse<Map<String, Boolean>>> toggleFollow(@Path("id") String userId);
 
     @GET("users/{id}/following")
-    Call<ApiResponse<List<Map<String, String>>>> getFollowing(@Path("id") String userId);
+    Call<ApiResponse<List<Map<String, String>>>> getFollowing(@Path("id") String userId, @Query("page") int page, @Query("limit") int limit);
+
+    @GET("users/{id}/followers")
+    Call<ApiResponse<List<Map<String, String>>>> getFollowers(@Path("id") String userId, @Query("page") int page, @Query("limit") int limit);
 }

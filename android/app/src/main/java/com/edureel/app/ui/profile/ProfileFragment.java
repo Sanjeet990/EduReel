@@ -44,7 +44,7 @@ public class ProfileFragment extends Fragment {
 
     private TextView tvAvatar, tvUsername, tvClassInfo;
     private android.widget.ImageView ivAvatar;
-    private TextView tvWatchedCount, tvSavedCount;
+    private TextView tvWatchedCount, tvSavedCount, tvFollowersCount, tvFollowingCount;
     private RecyclerView rvSavedReels;
     private SavedReelsAdapter adapter;
     private ApiService apiService;
@@ -92,7 +92,12 @@ public class ProfileFragment extends Fragment {
         tvClassInfo = view.findViewById(R.id.tvClassInfo);
         tvWatchedCount = view.findViewById(R.id.tvWatchedCount);
         tvSavedCount = view.findViewById(R.id.tvSavedCount);
+        tvFollowersCount = view.findViewById(R.id.tvFollowersCount);
+        tvFollowingCount = view.findViewById(R.id.tvFollowingCount);
+        
         View cardWatched = view.findViewById(R.id.cardWatched);
+        View cardFollowers = view.findViewById(R.id.cardFollowers);
+        View cardFollowing = view.findViewById(R.id.cardFollowing);
         View avatarContainer = view.findViewById(R.id.avatarContainer);
         android.widget.ImageView btnSettings = view.findViewById(R.id.btnSettings);
 
@@ -113,6 +118,18 @@ public class ProfileFragment extends Fragment {
 
         cardWatched.setOnClickListener(v -> {
             startActivity(new android.content.Intent(getContext(), com.edureel.app.ui.feed.WatchedFeedActivity.class));
+        });
+
+        cardFollowers.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), FollowListActivity.class);
+            intent.putExtra("TYPE", "FOLLOWERS");
+            startActivity(intent);
+        });
+
+        cardFollowing.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), FollowListActivity.class);
+            intent.putExtra("TYPE", "FOLLOWING");
+            startActivity(intent);
         });
 
         loadProfileData();
@@ -146,6 +163,11 @@ public class ProfileFragment extends Fragment {
                                     .apply(RequestOptions.circleCropTransform())
                                     .into(ivAvatar);
                         }
+
+                        int followersCount = profile.getFollowers() != null ? profile.getFollowers().size() : 0;
+                        int followingCount = profile.getFollowing() != null ? profile.getFollowing().size() : 0;
+                        tvFollowersCount.setText(String.valueOf(followersCount));
+                        tvFollowingCount.setText(String.valueOf(followingCount));
                     }
                 }
             }

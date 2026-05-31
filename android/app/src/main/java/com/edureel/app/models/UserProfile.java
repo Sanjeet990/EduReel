@@ -38,4 +38,10 @@ public class UserProfile {
     public int getStreakDays() { return streakDays; }
     public List<String> getWatchedVideos() { return watchedVideos; }
     public String getProfileImage() { return profileImage; }
+    
+    private List<String> followers;
+    private List<String> following;
+
+    public List<String> getFollowers() { return followers; }
+    public List<String> getFollowing() { return following; }
 }

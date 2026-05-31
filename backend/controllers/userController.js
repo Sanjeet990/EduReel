@@ -279,12 +279,19 @@ const toggleFollow = async (req, res) => {
 const getFollowing = async (req, res) => {
     try {
         const targetUserId = req.params.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
         const profile = await UserProfile.findOne({ user: targetUserId });
 
         if (!profile) return res.status(404).json({ success: false, message: 'User not found' });
 
+        const followingIds = profile.following.slice(skip, skip + limit);
+        const hasMore = skip + limit < profile.following.length;
+
         // Fetch their profiles to get avatars
-        const followingProfiles = await UserProfile.find({ user: { $in: profile.following } }).populate('user', 'name');
+        const followingProfiles = await UserProfile.find({ user: { $in: followingIds } }).populate('user', 'name');
         
         const data = followingProfiles.map(p => ({
             _id: p.user._id,
@@ -292,7 +299,39 @@ const getFollowing = async (req, res) => {
             profileImage: p.profileImage
         }));
 
-        res.json({ success: true, data });
+        res.json({ success: true, data, hasMore });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get followers list
+// @route   GET /api/users/:id/followers
+// @access  Private
+const getFollowers = async (req, res) => {
+    try {
+        const targetUserId = req.params.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const profile = await UserProfile.findOne({ user: targetUserId });
+
+        if (!profile) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const followerIds = profile.followers.slice(skip, skip + limit);
+        const hasMore = skip + limit < profile.followers.length;
+
+        // Fetch their profiles to get avatars
+        const followerProfiles = await UserProfile.find({ user: { $in: followerIds } }).populate('user', 'name');
+        
+        const data = followerProfiles.map(p => ({
+            _id: p.user._id,
+            name: p.user.name,
+            profileImage: p.profileImage
+        }));
+
+        res.json({ success: true, data, hasMore });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -308,5 +347,6 @@ module.exports = {
     getSubscription,
     getPublicProfile,
     toggleFollow,
-    getFollowing
+    getFollowing,
+    getFollowers
 };
