@@ -29,6 +29,8 @@ public class FollowListActivity extends AppCompatActivity {
 
     private String type; // "FOLLOWERS" or "FOLLOWING"
     private RecyclerView recyclerView;
+    private View emptyView;
+    private TextView tvEmptyMessage;
     private FollowListAdapter adapter;
     private ApiService apiService;
     private String userId;
@@ -52,6 +54,10 @@ public class FollowListActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         recyclerView = findViewById(R.id.recyclerView);
+        emptyView = findViewById(R.id.emptyView);
+        tvEmptyMessage = findViewById(R.id.tvEmptyMessage);
+        tvEmptyMessage.setText(type.equals("FOLLOWERS") ? "You don't have any followers yet" : "You aren't following anyone yet");
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new FollowListAdapter();
         recyclerView.setAdapter(adapter);
@@ -118,6 +124,14 @@ public class FollowListActivity extends AppCompatActivity {
                         adapter.addUsers(users, hasMore);
                     } else {
                         adapter.setUsers(users, hasMore);
+                    }
+                    
+                    if (adapter.getItemCount() == 0) {
+                        emptyView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else {
+                        emptyView.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
                     }
                 } else {
                     Toast.makeText(FollowListActivity.this, "Failed to load list", Toast.LENGTH_SHORT).show();

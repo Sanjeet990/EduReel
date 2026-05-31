@@ -29,6 +29,7 @@ import retrofit2.Response;
 public class FollowingFragment extends Fragment {
 
     private RecyclerView recyclerView;
+    private View emptyView;
     private FollowListAdapter adapter;
     private ApiService apiService;
     private String userId;
@@ -48,6 +49,7 @@ public class FollowingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.recyclerView);
+        emptyView = view.findViewById(R.id.emptyView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new FollowListAdapter();
         recyclerView.setAdapter(adapter);
@@ -111,6 +113,14 @@ public class FollowingFragment extends Fragment {
                         adapter.addUsers(users, hasMore);
                     } else {
                         adapter.setUsers(users, hasMore);
+                    }
+                    
+                    if (adapter.getItemCount() == 0) {
+                        emptyView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else {
+                        emptyView.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
                     }
                 } else {
                     if (getContext() != null) {

@@ -38,6 +38,8 @@ public class PublicProfileActivity extends AppCompatActivity {
     private Button btnFollow;
     private TextView tabReels, tabFollowing;
     private RecyclerView rvContent;
+    private View emptyView;
+    private TextView tvEmptyMessage;
     private ImageView btnBack;
 
     private VideoGridAdapter videoAdapter;
@@ -75,6 +77,8 @@ public class PublicProfileActivity extends AppCompatActivity {
         tabReels = findViewById(R.id.tabReels);
         tabFollowing = findViewById(R.id.tabFollowing);
         rvContent = findViewById(R.id.rvContent);
+        emptyView = findViewById(R.id.emptyView);
+        tvEmptyMessage = findViewById(R.id.tvEmptyMessage);
         btnBack = findViewById(R.id.btnBack);
 
         btnBack.setOnClickListener(v -> finish());
@@ -113,6 +117,15 @@ public class PublicProfileActivity extends AppCompatActivity {
             tabFollowing.setTextColor(0xFF888888);
             rvContent.setLayoutManager(new GridLayoutManager(this, 3));
             rvContent.setAdapter(videoAdapter);
+            
+            if (videoAdapter.getItemCount() == 0) {
+                emptyView.setVisibility(View.VISIBLE);
+                tvEmptyMessage.setText("No reels yet");
+                rvContent.setVisibility(View.GONE);
+            } else {
+                emptyView.setVisibility(View.GONE);
+                rvContent.setVisibility(View.VISIBLE);
+            }
         } else {
             tabReels.setTextColor(0xFF888888);
             tabFollowing.setTextColor(getResources().getColor(android.R.color.white));
@@ -155,6 +168,17 @@ public class PublicProfileActivity extends AppCompatActivity {
         if (videos != null) {
             videoAdapter.setVideos(videos);
         }
+        
+        if (isReelsTab) {
+            if (videoAdapter.getItemCount() == 0) {
+                emptyView.setVisibility(View.VISIBLE);
+                tvEmptyMessage.setText("No reels yet");
+                rvContent.setVisibility(View.GONE);
+            } else {
+                emptyView.setVisibility(View.GONE);
+                rvContent.setVisibility(View.VISIBLE);
+            }
+        }
 
         boolean isFollowing = com.edureel.app.managers.FollowManager.getInstance().isFollowing(targetUserId, profile.isFollowing());
         updateFollowButton(isFollowing);
@@ -194,7 +218,19 @@ public class PublicProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ApiResponse<List<Map<String, String>>>> call, Response<ApiResponse<List<Map<String, String>>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    followingAdapter.setUsers(response.body().getData());
+                    List<Map<String, String>> users = response.body().getData();
+                    followingAdapter.setUsers(users);
+                    
+                    if (!isReelsTab) {
+                        if (users == null || users.isEmpty()) {
+                            emptyView.setVisibility(View.VISIBLE);
+                            tvEmptyMessage.setText("Not following anyone yet");
+                            rvContent.setVisibility(View.GONE);
+                        } else {
+                            emptyView.setVisibility(View.GONE);
+                            rvContent.setVisibility(View.VISIBLE);
+                        }
+                    }
                 }
             }
             @Override
