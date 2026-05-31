@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,6 +60,20 @@ public class ExploreFragment extends Fragment {
         rvTrending.setAdapter(trendingAdapter);
 
         apiService = ApiClient.getClient(new TokenManager(requireContext())).create(ApiService.class);
+
+        EditText etSearch = view.findViewById(R.id.etSearch);
+        etSearch.setOnEditorActionListener((TextView v, int actionId, android.view.KeyEvent event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = v.getText().toString().trim();
+                if (!query.isEmpty()) {
+                    android.content.Intent intent = new android.content.Intent(getContext(), ExploreFeedActivity.class);
+                    intent.putExtra("searchQuery", query);
+                    startActivity(intent);
+                }
+                return true;
+            }
+            return false;
+        });
 
         // Set click listeners
         subjectAdapter.setOnSubjectClickListener(subject -> {

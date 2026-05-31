@@ -3,6 +3,7 @@ const router = express.Router();
 const { 
     getFeed, 
     getExplore, 
+    searchVideos,
     getVideoDetail,
     viewVideo,
     likeVideo,
@@ -14,6 +15,7 @@ const { checkSubscription } = require('../middleware/subscriptionMiddleware');
 // User video routes
 router.get('/feed', protect, checkSubscription, getFeed);
 router.get('/explore', getExplore);
+router.get('/search', searchVideos);
 router.get('/:id', getVideoDetail);
 router.get('/:id/stream', (req, res) => {
     // Redirect to HLS master file

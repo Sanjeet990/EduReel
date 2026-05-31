@@ -96,6 +96,88 @@ const getExplore = async (req, res) => {
     }
 };
 
+// @desc    Search videos
+// @route   GET /api/videos/search
+// @access  Public or Private
+const searchVideos = async (req, res) => {
+    const { q } = req.query;
+    const limit = parseInt(req.query.limit) || 50;
+
+    if (!q) {
+        return res.status(400).json({ success: false, message: 'Search query is required' });
+    }
+
+    let query = { status: 'ready', isActive: true };
+    query.$or = [
+        { title: { $regex: q, $options: 'i' } },
+        { subject: { $regex: q, $options: 'i' } }
+    ];
+
+    try {
+        const videos = await Video.find(query)
+            .sort({ viewCount: -1 })
+            .limit(limit)
+            .populate('uploadedBy', 'name')
+            .lean();
+
+        // Enrich with uploader profile image
+        const uploaderIds = [...new Set(videos.map(v => v.uploadedBy?._id).filter(Boolean))];
+        const uploaderProfiles = await UserProfile.find({ user: { $in: uploaderIds } });
+        
+        const profileMap = {};
+        uploaderProfiles.forEach(p => {
+            profileMap[p.user.toString()] = p.profileImage;
+        });
+
+        let followingList = [];
+        let interactionsMap = {};
+        if (req.user) {
+            const myProfile = await UserProfile.findOne({ user: req.user._id });
+            if (myProfile && myProfile.following) {
+                followingList = myProfile.following.map(id => id.toString());
+            }
+
+            const videoIds = videos.map(v => v._id.toString());
+            const userInteractions = await Interaction.find({
+                user: req.user._id,
+                video: { $in: videoIds }
+            });
+
+            userInteractions.forEach(interaction => {
+                interactionsMap[interaction.video.toString()] = {
+                    isLiked: interaction.liked || false,
+                    isSaved: interaction.saved || false
+                };
+            });
+        }
+
+        const finalVideos = videos.map(v => {
+            let uploaderInfo = null;
+            if (v.uploadedBy) {
+                uploaderInfo = {
+                    _id: v.uploadedBy._id,
+                    name: v.uploadedBy.name,
+                    avatar: profileMap[v.uploadedBy._id.toString()] || null,
+                    isFollowing: followingList.includes(v.uploadedBy._id.toString())
+                };
+            }
+            const videoIdStr = v._id.toString();
+            const interaction = interactionsMap[videoIdStr] || { isLiked: false, isSaved: false };
+            
+            return { 
+                ...v, 
+                uploader: uploaderInfo,
+                isLiked: interaction.isLiked,
+                isSaved: interaction.isSaved
+            };
+        });
+
+        res.json({ success: true, data: finalVideos });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // @desc    Get video detail
 // @route   GET /api/videos/:id
 // @access  Public
@@ -239,6 +321,7 @@ const saveVideo = async (req, res) => {
 module.exports = {
     getFeed,
     getExplore,
+    searchVideos,
     getVideoDetail,
     viewVideo,
     likeVideo,

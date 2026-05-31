@@ -45,6 +45,9 @@ public interface ApiService {
     @GET("videos/explore")
     Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel, @Query("limit") Integer limit);
 
+    @GET("videos/search")
+    Call<ApiResponse<List<Video>>> searchVideos(@Query("q") String query, @Query("limit") Integer limit);
+
     @POST("videos/{id}/view")
     Call<ApiResponse<Void>> viewVideo(@Path("id") String videoId, @Body Map<String, Integer> body);
 

@@ -41,6 +41,7 @@ import retrofit2.Response;
 public class ExploreFeedActivity extends AppCompatActivity {
 
     private ViewPager2 viewPager;
+    private View layoutEmptyState;
     private VideoAdapter videoAdapter;
     private ExoPlayer exoPlayer;
     private TokenManager tokenManager;
@@ -50,6 +51,7 @@ public class ExploreFeedActivity extends AppCompatActivity {
 
     private String subject;
     private boolean isTrending;
+    private String searchQuery;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,17 +60,21 @@ public class ExploreFeedActivity extends AppCompatActivity {
 
         subject = getIntent().getStringExtra("subject");
         isTrending = getIntent().getBooleanExtra("isTrending", false);
+        searchQuery = getIntent().getStringExtra("searchQuery");
 
         tokenManager = new TokenManager(this);
         apiService = ApiClient.getClient(tokenManager).create(ApiService.class);
 
         viewPager = findViewById(R.id.viewPager);
+        layoutEmptyState = findViewById(R.id.layoutEmptyState);
         
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
         TextView tvTitle = findViewById(R.id.tvTitle);
-        if (subject != null) {
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            tvTitle.setText("Search: " + searchQuery);
+        } else if (subject != null) {
             tvTitle.setText(subject);
         } else if (isTrending) {
             tvTitle.setText("Trending Now");
@@ -196,30 +202,60 @@ public class ExploreFeedActivity extends AppCompatActivity {
     }
 
     private void loadVideos() {
-        Integer limit = isTrending ? 20 : null; // Limit to 20 for trending, or all (50 by default in backend) for subject
-        apiService.getExplore(subject, null, limit).enqueue(new Callback<ApiResponse<List<Video>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Video> videos = response.body().getData();
-                    if (videos != null && !videos.isEmpty()) {
-                        videoAdapter.setVideos(videos);
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            apiService.searchVideos(searchQuery, null).enqueue(new Callback<ApiResponse<List<Video>>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<Video> videos = response.body().getData();
+                        if (videos != null && !videos.isEmpty()) {
+                            videoAdapter.setVideos(videos);
+                            viewPager.setVisibility(View.VISIBLE);
+                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                        } else {
+                            viewPager.setVisibility(View.GONE);
+                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
+                        }
                     } else {
-                        Toast.makeText(ExploreFeedActivity.this, "No videos found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ExploreFeedActivity.this, "Failed to load videos", Toast.LENGTH_SHORT).show();
                         finish();
                     }
-                } else {
-                    Toast.makeText(ExploreFeedActivity.this, "Failed to load videos", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                    Toast.makeText(ExploreFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
                     finish();
                 }
-            }
+            });
+        } else {
+            Integer limit = isTrending ? 20 : null; // Limit to 20 for trending, or all (50 by default in backend) for subject
+            apiService.getExplore(subject, null, limit).enqueue(new Callback<ApiResponse<List<Video>>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<Video> videos = response.body().getData();
+                        if (videos != null && !videos.isEmpty()) {
+                            videoAdapter.setVideos(videos);
+                            viewPager.setVisibility(View.VISIBLE);
+                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+                        } else {
+                            viewPager.setVisibility(View.GONE);
+                            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        Toast.makeText(ExploreFeedActivity.this, "Failed to load videos", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
 
-            @Override
-            public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
-                Toast.makeText(ExploreFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
+                @Override
+                public void onFailure(Call<ApiResponse<List<Video>>> call, Throwable t) {
+                    Toast.makeText(ExploreFeedActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            });
+        }
     }
 
     private void playVideoAtPosition(int position) {
