@@ -192,7 +192,7 @@
                 android:layout_height="48dp"
                 android:background="@drawable/bg_fab_translucent"
                 android:padding="12dp"
-                android:src="@drawable/ic_like_view"
+                android:src="@drawable/ic_heart"
                 app:tint="@android:color/white" />
 
             <TextView

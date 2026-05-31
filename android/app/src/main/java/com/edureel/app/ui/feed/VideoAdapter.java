@@ -143,6 +143,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         public View touchOverlay;
         public ImageView ivPlayPauseIndicator;
         public TextView tvSpeedIndicator;
+        private float initialTouchX, initialTouchY;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -270,6 +271,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                         if (btnLike != null) {
                             btnLike.performClick();
                         }
+                        showHeartAnimation(touchOverlay, e.getX(), e.getY());
                         return true;
                     }
 
@@ -313,8 +315,20 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                     
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            initialTouchX = event.getX();
+                            initialTouchY = event.getY();
                             if (inTopRight) {
                                 handler.postDelayed(speedRunnable, 300);
+                            }
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            float currentX = event.getX();
+                            float currentY = event.getY();
+                            float diffXMove = Math.abs(currentX - initialTouchX);
+                            float diffYMove = Math.abs(currentY - initialTouchY);
+                            // If horizontal drag intent is detected early, lock the ViewPager2 to prevent vertical stutter
+                            if (diffXMove > diffYMove && diffXMove > 20) {
+                                v.getParent().requestDisallowInterceptTouchEvent(true);
                             }
                             break;
                         case MotionEvent.ACTION_UP:
@@ -334,6 +348,48 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             if (count >= 1000000) return String.format("%.1fm", count / 1000000.0);
             if (count >= 1000) return String.format("%.1fk", count / 1000.0);
             return String.valueOf(count);
+        }
+
+        private void showHeartAnimation(View anchorView, float x, float y) {
+            if (anchorView.getParent() instanceof ViewGroup) {
+                ViewGroup parent = (ViewGroup) anchorView.getParent();
+                ImageView heart = new ImageView(anchorView.getContext());
+                heart.setImageResource(R.drawable.ic_heart);
+                
+                int size = (int) (100 * anchorView.getResources().getDisplayMetrics().density);
+                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(size, size);
+                heart.setLayoutParams(params);
+                
+                heart.setX(x - size / 2f);
+                heart.setY(y - size / 2f);
+                
+                // Instagram-style bright pink/red
+                heart.setColorFilter(0xFFE91E63, android.graphics.PorterDuff.Mode.SRC_IN);
+                
+                // Slight random rotation
+                heart.setRotation((float)(Math.random() * 30 - 15));
+                
+                parent.addView(heart);
+                
+                heart.setScaleX(0f);
+                heart.setScaleY(0f);
+                
+                heart.animate()
+                     .scaleX(1.2f)
+                     .scaleY(1.2f)
+                     .setDuration(300)
+                     .setInterpolator(new android.view.animation.OvershootInterpolator())
+                     .withEndAction(() -> {
+                         heart.animate()
+                              .translationY(heart.getY() - 150)
+                              .alpha(0f)
+                              .setDuration(500)
+                              .setStartDelay(200)
+                              .withEndAction(() -> parent.removeView(heart))
+                              .start();
+                     })
+                     .start();
+            }
         }
     }
 }
