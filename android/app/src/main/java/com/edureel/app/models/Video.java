@@ -53,4 +53,5 @@ public class Video {
     public void setSaved(boolean saved) { isSaved = saved; }
     
     public Uploader getUploader() { return uploader; }
+    public void setUploader(Uploader uploader) { this.uploader = uploader; }
 }

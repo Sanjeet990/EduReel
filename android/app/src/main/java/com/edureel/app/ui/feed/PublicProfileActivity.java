@@ -87,7 +87,10 @@ public class PublicProfileActivity extends AppCompatActivity {
 
     private void setupAdapters() {
         videoAdapter = new VideoGridAdapter(video -> {
-            // Can open full video view later if needed, left simple for now
+            Intent intent = new Intent(this, CreatorFeedActivity.class);
+            intent.putExtra(CreatorFeedActivity.EXTRA_CREATOR_ID, targetUserId);
+            intent.putExtra(CreatorFeedActivity.EXTRA_INITIAL_VIDEO_ID, video.getId());
+            startActivity(intent);
         });
         
         followingAdapter = new FollowingAdapter(userId -> {

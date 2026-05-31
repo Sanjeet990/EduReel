@@ -5,9 +5,14 @@ import com.edureel.app.managers.FollowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.core.view.GestureDetectorCompat;
 
 import androidx.annotation.NonNull;
 import androidx.media3.ui.PlayerView;
@@ -135,6 +140,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         private TextView tvLikeCount, tvCommentCount;
         private ImageView btnLike, btnComment, btnShare, btnSave;
         public TextView tvAvatar, tvChannelName, btnFollow;
+        public View touchOverlay;
+        public ImageView ivPlayPauseIndicator;
+        public TextView tvSpeedIndicator;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -152,6 +160,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             tvAvatar = itemView.findViewById(R.id.tvAvatar);
             tvChannelName = itemView.findViewById(R.id.tvChannelName);
             btnFollow = itemView.findViewById(R.id.btnFollow);
+            touchOverlay = itemView.findViewById(R.id.touchOverlay);
+            ivPlayPauseIndicator = itemView.findViewById(R.id.ivPlayPauseIndicator);
+            tvSpeedIndicator = itemView.findViewById(R.id.tvSpeedIndicator);
         }
 
         public void bind(Video video, OnVideoInteractionListener listener) {
@@ -233,6 +244,91 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             // Reset player view for new binding
             playerView.setPlayer(null);
             progressBar.setVisibility(View.VISIBLE);
+            
+            if (touchOverlay != null) {
+                GestureDetectorCompat gestureDetector = new GestureDetectorCompat(touchOverlay.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        if (playerView.getPlayer() != null) {
+                            boolean isPlaying = playerView.getPlayer().isPlaying();
+                            if (isPlaying) {
+                                playerView.getPlayer().pause();
+                                ivPlayPauseIndicator.setImageResource(android.R.drawable.ic_media_pause);
+                            } else {
+                                playerView.getPlayer().play();
+                                ivPlayPauseIndicator.setImageResource(android.R.drawable.ic_media_play);
+                            }
+                            ivPlayPauseIndicator.setVisibility(View.VISIBLE);
+                            ivPlayPauseIndicator.setAlpha(1f);
+                            ivPlayPauseIndicator.animate().alpha(0f).setDuration(800).withEndAction(() -> ivPlayPauseIndicator.setVisibility(View.GONE)).start();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        if (btnLike != null) {
+                            btnLike.performClick();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                        if (e1 != null && e2 != null) {
+                            float diffX = e2.getX() - e1.getX();
+                            float diffY = e2.getY() - e1.getY();
+                            // Maximum sensitivity: Ignore angle/diffY completely. Just check if it's a quick right-to-left flick.
+                            if (diffX < -20 && velocityX < -200) { // Swipe Right to Left
+                                if (listener != null && video.getUploader() != null) {
+                                    listener.onProfileClick(video.getUploader()._id);
+                                }
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                    
+                    @Override
+                    public boolean onDown(MotionEvent e) {
+                        return true; // Must return true to receive subsequent events
+                    }
+                });
+
+                Handler handler = new Handler(Looper.getMainLooper());
+                Runnable speedRunnable = () -> {
+                    if (playerView.getPlayer() != null) {
+                        playerView.getPlayer().setPlaybackSpeed(2f);
+                        tvSpeedIndicator.setVisibility(View.VISIBLE);
+                    }
+                };
+
+                touchOverlay.setOnTouchListener((v, event) -> {
+                    gestureDetector.onTouchEvent(event);
+                    
+                    int width = v.getWidth();
+                    int height = v.getHeight();
+                    // 25% top right corner: right 25% width, top 25% height
+                    boolean inTopRight = (event.getX() > width * 0.75f) && (event.getY() < height * 0.25f);
+                    
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            if (inTopRight) {
+                                handler.postDelayed(speedRunnable, 300);
+                            }
+                            break;
+                        case MotionEvent.ACTION_UP:
+                        case MotionEvent.ACTION_CANCEL:
+                            handler.removeCallbacks(speedRunnable);
+                            if (playerView.getPlayer() != null) {
+                                playerView.getPlayer().setPlaybackSpeed(1f);
+                            }
+                            tvSpeedIndicator.setVisibility(View.GONE);
+                            break;
+                    }
+                    return true;
+                });
+            }
         }
         private String formatCount(int count) {
             if (count >= 1000000) return String.format("%.1fm", count / 1000000.0);

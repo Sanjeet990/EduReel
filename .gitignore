@@ -28,3 +28,6 @@ android/app/build/
 
 backend/public
 *.hprof
+
+android/.idea/
+android/.gradle/
