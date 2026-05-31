@@ -156,7 +156,7 @@ public class ProfileFragment extends Fragment {
                             ivAvatar.setVisibility(View.VISIBLE);
                             String imageUrl = profile.getProfileImage();
                             if (imageUrl.startsWith("/")) {
-                                imageUrl = "http://192.168.29.15:5000" + imageUrl;
+                                imageUrl = com.edureel.app.utils.Constants.SERVER_URL + imageUrl;
                             }
                             Glide.with(ProfileFragment.this)
                                     .load(imageUrl)

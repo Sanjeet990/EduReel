@@ -47,10 +47,10 @@ public class VideoGridAdapter extends RecyclerView.Adapter<VideoGridAdapter.View
         if (thumbUrl != null) {
             thumbUrl = thumbUrl.replace("\\", "/");
             if (thumbUrl.startsWith("/hls")) {
-                thumbUrl = "http://192.168.29.15:5000" + thumbUrl;
+                thumbUrl = com.edureel.app.utils.Constants.SERVER_URL + thumbUrl;
             } else if (thumbUrl.contains("localhost") || thumbUrl.contains("127.0.0.1")) {
-                thumbUrl = thumbUrl.replace("localhost", "192.168.29.15")
-                                   .replace("127.0.0.1", "192.168.29.15");
+                thumbUrl = thumbUrl.replace("localhost", com.edureel.app.utils.Constants.SERVER_IP)
+                                   .replace("127.0.0.1", com.edureel.app.utils.Constants.SERVER_IP);
             }
         }
 

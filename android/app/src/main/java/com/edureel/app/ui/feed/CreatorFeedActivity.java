@@ -260,7 +260,7 @@ public class CreatorFeedActivity extends AppCompatActivity {
         if (video == null || video.getHlsUrl() == null) return;
         
         String rawHlsUrl = video.getHlsUrl();
-        final String finalHlsUrl = rawHlsUrl.startsWith("/hls") ? "http://192.168.29.15:5000" + rawHlsUrl : rawHlsUrl;
+        final String finalHlsUrl = rawHlsUrl.startsWith("/hls") ? com.edureel.app.utils.Constants.SERVER_URL + rawHlsUrl : rawHlsUrl;
         
         RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
         if (recyclerView != null) {

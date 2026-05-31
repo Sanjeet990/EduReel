@@ -94,7 +94,7 @@ public class ExploreAdapter extends RecyclerView.Adapter<ExploreAdapter.ViewHold
                 ivThumbnail.setVisibility(View.VISIBLE);
                 String url = video.getThumbnailUrl();
                 if (url.startsWith("/")) {
-                    url = "http://192.168.29.15:5000" + url;
+                    url = com.edureel.app.utils.Constants.SERVER_URL + url;
                 }
                 Glide.with(itemView.getContext())
                      .load(url)

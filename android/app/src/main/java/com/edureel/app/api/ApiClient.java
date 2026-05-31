@@ -23,7 +23,7 @@ public class ApiClient {
                 .build();
 
             retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.29.15:5000/api/")
+                .baseUrl(com.edureel.app.utils.Constants.SERVER_URL + "/api/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();

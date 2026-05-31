@@ -250,7 +250,7 @@ public class HomeFragment extends Fragment {
 
                 String hlsUrl = video.getHlsUrl();
                 if (hlsUrl.startsWith("/hls")) {
-                    hlsUrl = "http://192.168.29.15:5000" + hlsUrl;
+                    hlsUrl = com.edureel.app.utils.Constants.SERVER_URL + hlsUrl;
                 }
 
                 androidx.media3.common.MediaItem mediaItem = androidx.media3.common.MediaItem.fromUri(android.net.Uri.parse(hlsUrl));
