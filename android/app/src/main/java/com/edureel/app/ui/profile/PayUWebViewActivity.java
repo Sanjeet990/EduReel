@@ -30,12 +30,43 @@ public class PayUWebViewActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.contains("payu-callback")) {
-                    // Reached callback URL
-                    finish(); // Go back to PlanListingActivity, which will refresh user info
+                if (url.contains("payment-success")) {
+                    android.widget.Toast.makeText(PayUWebViewActivity.this, "Payment Successful!", android.widget.Toast.LENGTH_SHORT).show();
+                    finish();
+                    return true;
+                } else if (url.contains("payment-failure")) {
+                    android.widget.Toast.makeText(PayUWebViewActivity.this, "Payment Failed", android.widget.Toast.LENGTH_SHORT).show();
+                    finish();
+                    return true;
+                } else if (url.contains("payu-callback")) {
+                    return false; // Let POST happen
+                }
+                
+                // Handle UPI and other intent schemes (e.g., upi://, intent://)
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
+                
+                try {
+                    android.content.Intent intent = android.content.Intent.parseUri(url, android.content.Intent.URI_INTENT_SCHEME);
+                    try {
+                        startActivity(intent);
+                        return true;
+                    } catch (android.content.ActivityNotFoundException e) {
+                        // Fallback if the app isn't installed
+                        String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                        if (fallbackUrl != null) {
+                            view.loadUrl(fallbackUrl);
+                            return true;
+                        } else {
+                            android.widget.Toast.makeText(PayUWebViewActivity.this, "No app installed to handle this payment method", android.widget.Toast.LENGTH_LONG).show();
+                            return true;
+                        }
+                    }
+                } catch (Exception e) {
+                    android.widget.Toast.makeText(PayUWebViewActivity.this, "Error opening payment app", android.widget.Toast.LENGTH_SHORT).show();
                     return true;
                 }
-                return super.shouldOverrideUrlLoading(view, url);
             }
         });
 
@@ -66,7 +97,7 @@ public class PayUWebViewActivity extends AppCompatActivity {
                     + "&udf2=" + URLEncoder.encode(udf2, "UTF-8")
                     + "&hash=" + URLEncoder.encode(hash, "UTF-8");
 
-            webView.postUrl("https://test.payu.in/_payment", postData.getBytes());
+            webView.postUrl("https://secure.payu.in/_payment", postData.getBytes());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

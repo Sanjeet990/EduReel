@@ -44,8 +44,13 @@ public class PlanListingActivity extends AppCompatActivity {
         binding.btnBack.setOnClickListener(v -> finish());
         binding.rvPlans.setLayoutManager(new LinearLayoutManager(this));
 
-        fetchUserDetails();
         fetchPlans();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchUserDetails();
     }
     
     private void fetchUserDetails() {
