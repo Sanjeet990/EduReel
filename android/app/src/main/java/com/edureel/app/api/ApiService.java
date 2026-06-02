@@ -101,4 +101,12 @@ public interface ApiService {
 
     @GET("users/{id}/followers")
     Call<ApiResponse<List<Map<String, String>>>> getFollowers(@Path("id") String userId, @Query("page") int page, @Query("limit") int limit);
+
+    // Plans
+    @GET("plans")
+    Call<ApiResponse<List<com.edureel.app.models.Plan>>> getPlans();
+
+    // Payments
+    @POST("payments/create-order")
+    Call<ApiResponse<Map<String, String>>> createOrder(@Body Map<String, Object> body);
 }

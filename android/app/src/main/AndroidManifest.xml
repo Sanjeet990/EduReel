@@ -42,6 +42,8 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         
         <activity android:name=".ui.explore.ExploreFeedActivity" />
+        <activity android:name=".ui.profile.PlanListingActivity" />
+        <activity android:name=".ui.profile.PayUWebViewActivity" />
     </application>
 
 </manifest>

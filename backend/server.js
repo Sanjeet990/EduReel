@@ -60,6 +60,7 @@ const commentRoutes = require('./routes/commentRoutes');
 //const uploadRoutes = require('./routes/uploadRoutes');
 const userRoutes = require('./routes/userRoutes');
 const metadataRoutes = require('./routes/metadataRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/plans', planRoutes);
@@ -69,6 +70,7 @@ app.use('/api', commentRoutes);
 //app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/metadata', metadataRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, 'frontend_dist')));

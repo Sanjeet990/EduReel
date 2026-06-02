@@ -132,6 +132,13 @@ public class ProfileFragment extends Fragment {
             startActivity(intent);
         });
 
+        View llSubscription = view.findViewById(R.id.llSubscription);
+        if (llSubscription != null) {
+            llSubscription.setOnClickListener(v -> {
+                startActivity(new android.content.Intent(getContext(), PlanListingActivity.class));
+            });
+        }
+
         loadProfileData();
         loadSavedVideos();
     }
