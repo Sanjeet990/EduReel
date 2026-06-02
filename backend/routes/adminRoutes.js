@@ -17,7 +17,8 @@ const {
     getAnalytics,
     getVideoComments,
     deleteComment,
-    editComment
+    editComment,
+    reuploadVideo
 } = require('../controllers/adminController');
 
 // All routes here are admin only
@@ -30,6 +31,7 @@ router.route('/videos')
 router.route('/videos/:id')
     .put(updateVideo)
     .delete(deleteVideo);
+router.put('/videos/:id/reupload', upload.single('video'), reuploadVideo);
 
 router.get('/videos/:id/comments', getVideoComments);
 router.put('/comments/:id', editComment);

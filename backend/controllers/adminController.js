@@ -69,6 +69,78 @@ const uploadVideo = async (req, res) => {
     }
 };
 
+// @desc    Reupload video
+// @route   PUT /api/admin/videos/:id/reupload
+// @access  Private/Admin
+const reuploadVideo = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No video file provided' });
+    }
+
+    const videoId = req.params.id;
+    const rawFilePath = req.file.path;
+
+    try {
+        const video = await Video.findById(videoId);
+        if (!video) {
+            fs.unlinkSync(rawFilePath);
+            return res.status(404).json({ success: false, message: 'Video not found' });
+        }
+
+        // Validate duration with ffprobe
+        ffmpeg.ffprobe(rawFilePath, async (err, metadata) => {
+            if (err) {
+                fs.unlinkSync(rawFilePath);
+                return res.status(500).json({ success: false, message: 'Error analyzing video file' });
+            }
+
+            const durationSeconds = metadata.format.duration;
+
+            if (durationSeconds < 10) {
+                fs.unlinkSync(rawFilePath);
+                return res.status(400).json({ success: false, message: 'Video too short. Must be at least 10s.' });
+            }
+            if (durationSeconds > 90) {
+                fs.unlinkSync(rawFilePath);
+                return res.status(400).json({ success: false, message: 'Video too long. Must be under 90s.' });
+            }
+
+            // Cleanup old HLS files and thumbnails
+            const path = require('path');
+            const hlsDir = path.join('public', 'hls', videoId);
+            if (fs.existsSync(hlsDir)) {
+                fs.rmSync(hlsDir, { recursive: true, force: true });
+            }
+
+            // Update video document
+            video.status = 'processing';
+            video.rawFilePath = rawFilePath;
+            video.durationSeconds = durationSeconds;
+            // Clear old URLs
+            video.hlsUrl = undefined;
+            video.thumbnailUrl = undefined;
+            video.resolutions = [];
+            
+            await video.save();
+
+            res.status(202).json({ 
+                success: true, 
+                message: 'Re-upload successful, transcoding started',
+                data: { videoId, status: 'processing' }
+            });
+
+            // Trigger transcoder asynchronously
+            transcode(videoId, rawFilePath);
+        });
+
+    } catch (error) {
+        if (fs.existsSync(rawFilePath)) {
+            fs.unlinkSync(rawFilePath);
+        }
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // @desc    Get all videos (admin view)
 // @route   GET /api/admin/videos
 // @access  Private/Admin
@@ -454,5 +526,6 @@ module.exports = {
     getAnalytics,
     getVideoComments,
     deleteComment,
-    editComment
+    editComment,
+    reuploadVideo
 };

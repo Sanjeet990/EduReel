@@ -28,6 +28,13 @@ const Videos = () => {
     const [videoToEdit, setVideoToEdit] = useState(null);
     const [editData, setEditData] = useState({ title: '', subject: '', targetClass: [] });
 
+    // Reupload states
+    const [reuploadModalOpen, setReuploadModalOpen] = useState(false);
+    const [videoToReupload, setVideoToReupload] = useState(null);
+    const [reuploadFile, setReuploadFile] = useState(null);
+    const [isReuploading, setIsReuploading] = useState(false);
+    const [reuploadProgress, setReuploadProgress] = useState(0);
+
     // Filter states
     const [filterSubject, setFilterSubject] = useState('');
     const [filterClass, setFilterClass] = useState('');
@@ -226,6 +233,61 @@ const Videos = () => {
             console.error(err);
             alert('Failed to update video');
         }
+    };
+
+    const openReuploadModal = (video) => {
+        setVideoToReupload(video);
+        setReuploadFile(null);
+        setReuploadModalOpen(true);
+    };
+
+    const startReupload = async () => {
+        if (!reuploadFile || !videoToReupload) return;
+
+        const videoElement = document.createElement('video');
+        videoElement.preload = 'metadata';
+        videoElement.onloadedmetadata = async () => {
+            window.URL.revokeObjectURL(videoElement.src);
+            const duration = videoElement.duration;
+            
+            if (duration < 10 || duration > 90) {
+                setError(`Video must be between 10-90s (current: ${Math.round(duration)}s)`);
+                setReuploadModalOpen(false);
+                return;
+            }
+
+            setIsReuploading(true);
+            setReuploadProgress(0);
+            setStatusMsg('Re-uploading...');
+            setError('');
+
+            const formData = new FormData();
+            formData.append('video', reuploadFile);
+
+            try {
+                const res = await api.put(`/admin/videos/${videoToReupload._id}/reupload`, formData, {
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        setReuploadProgress(percentCompleted);
+                    }
+                });
+                
+                setStatusMsg('Processing...');
+                setStatusId(videoToReupload._id);
+                setReuploadProgress(100);
+                
+                setReuploadModalOpen(false);
+                setVideoToReupload(null);
+                setReuploadFile(null);
+                setIsReuploading(false);
+                fetchVideos();
+                
+            } catch (err) {
+                setError(err.response?.data?.message || 'Re-upload failed');
+                setIsReuploading(false);
+            }
+        };
+        videoElement.src = URL.createObjectURL(reuploadFile);
     };
 
     return (
@@ -443,6 +505,7 @@ const Videos = () => {
                                     <td className="py-4 text-right whitespace-nowrap">
                                         <Link to={`/videos/${video._id}/comments`} className="inline-flex items-center px-3 py-1.5 rounded-md bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 text-xs font-semibold mr-2 transition-colors">Moderate</Link>
                                         <button onClick={() => openEditModal(video)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-accent/15 text-accent hover:bg-accent/25 text-xs font-semibold mr-2 transition-colors">Edit</button>
+                                        <button onClick={() => openReuploadModal(video)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-yellow-500/15 text-yellow-500 hover:bg-yellow-500/25 text-xs font-semibold mr-2 transition-colors">Reupload</button>
                                         <button onClick={() => openDeleteModal(video)} className="inline-flex items-center px-3 py-1.5 rounded-md bg-red-500/15 text-red-400 hover:bg-red-500/25 text-xs font-semibold transition-colors">Delete</button>
                                     </td>
                                 </tr>
@@ -545,6 +608,46 @@ const Videos = () => {
                                     {uploading ? 'Uploading...' : 'Upload Video'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reupload Modal */}
+            {reuploadModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-bg-surface border border-border p-6 rounded-xl shadow-xl w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-white">Reupload Video</h2>
+                            <button onClick={() => setReuploadModalOpen(false)} className="text-gray-400 hover:text-white"><X size={20}/></button>
+                        </div>
+                        <p className="text-gray-300 mb-6">
+                            Select a new video file to replace <span className="text-white font-medium">"{videoToReupload?.title}"</span>. 
+                            The old video and its thumbnails will be deleted and the new video will be processed.
+                        </p>
+                        
+                        <div className="mb-6">
+                            <input 
+                                type="file" 
+                                accept="video/mp4,video/quicktime"
+                                onChange={(e) => setReuploadFile(e.target.files[0])}
+                                className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-bg-elevated file:text-white hover:file:bg-border transition-colors cursor-pointer"
+                                disabled={isReuploading}
+                            />
+                        </div>
+
+                        {isReuploading && (
+                            <div className="mb-6">
+                                <p className="text-accent font-medium mb-2">{statusMsg} {reuploadProgress}%</p>
+                                <div className="w-full bg-bg-elevated rounded-full h-2 border border-border">
+                                    <div className="bg-accent h-2 rounded-full" style={{ width: `${reuploadProgress}%` }}></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end space-x-3">
+                            <button onClick={() => setReuploadModalOpen(false)} disabled={isReuploading} className="px-4 py-2 rounded-lg bg-bg-elevated hover:bg-border text-white transition-colors disabled:opacity-50">Cancel</button>
+                            <button onClick={startReupload} disabled={isReuploading || !reuploadFile} className="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reupload</button>
                         </div>
                     </div>
                 </div>
