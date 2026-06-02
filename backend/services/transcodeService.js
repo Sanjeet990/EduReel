@@ -40,14 +40,14 @@ const transcode = async (videoId, rawFilePath) => {
                     .outputOptions([
                         '-vf', `scale=-2:${res.height}`,
                         '-c:v', 'libx264',
-                        '-preset', 'fast',
+                        '-preset', 'ultrafast',
                         '-crf', '23',
                         '-c:a', 'aac',
                         '-b:a', '128k',
                         '-maxrate', res.bitrate,
                         '-bufsize', res.bitrate,
                         '-hls_time', '2',
-                        '-hls_playlist_type', 'event',
+                        '-hls_playlist_type', 'vod',
                         '-hls_segment_type', 'fmp4',
                         '-hls_flags', 'independent_segments',
                         '-hls_segment_filename', segmentFilename
