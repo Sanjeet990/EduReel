@@ -25,6 +25,9 @@ app.use('/hls', express.static(path.join(__dirname, 'public/hls'), {
         } else if (filePath.endsWith('.m4s')) {
             res.set('Cache-Control', 'public, max-age=31536000'); // segments
             res.set('Content-Type', 'video/iso.segment');
+        } else if (filePath.endsWith('.mp4')) {
+            res.set('Cache-Control', 'public, max-age=31536000'); // init segment
+            res.set('Content-Type', 'video/mp4');
         } else {
             res.set('Cache-Control', 'public, max-age=31536000');
         }
@@ -71,7 +74,10 @@ app.use('/api/metadata', metadataRoutes);
 app.use(express.static(path.join(__dirname, 'frontend_dist')));
 
 // SPA fallback for any route not caught by API or static files
-app.get(/(.*)/, (req, res) => {
+app.get(/(.*)/, (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/hls/')) {
+        return res.status(404).json({ success: false, message: 'Resource not found' });
+    }
     res.sendFile(path.join(__dirname, 'frontend_dist', 'index.html'));
 });
 
