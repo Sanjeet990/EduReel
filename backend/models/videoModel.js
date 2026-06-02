@@ -12,7 +12,7 @@ const videoSchema = mongoose.Schema(
         targetClass: [{ type: Number }], // e.g. [9, 10] means visible to class 9 and 10
         targetAgeGroup: { 
             type: String, 
-            enum: ['under13','13-17','18-22','23+']
+            enum: ['Under 13','13-17','18-22','23+']
         },
         uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         status: { 

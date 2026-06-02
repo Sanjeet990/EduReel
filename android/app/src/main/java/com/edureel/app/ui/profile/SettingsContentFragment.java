@@ -46,7 +46,7 @@ public class SettingsContentFragment extends Fragment {
     private Button btnSaveContent;
     private ApiService apiService;
 
-    private final String[] ageOptions = {"under13", "13-17", "18-22", "23+"};
+    private final String[] ageOptions = {"Under 13", "13-17", "18-22", "23+"};
     
     private List<MetadataClass> classOptionsList = new ArrayList<>();
     private List<MetadataSubject> subjectOptionsList = new ArrayList<>();

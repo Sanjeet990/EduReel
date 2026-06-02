@@ -99,7 +99,7 @@ const PreferenceModal = ({ userId, onClose }) => {
                                 className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent"
                             >
                                 <option value="">Select Age Group</option>
-                                <option value="under13">Under 13</option>
+                                <option value="Under 13">Under 13</option>
                                 <option value="13-17">13 - 17</option>
                                 <option value="18-22">18 - 22</option>
                                 <option value="23+">23+</option>

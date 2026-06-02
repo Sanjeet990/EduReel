@@ -5,7 +5,7 @@ const userProfileSchema = mongoose.Schema(
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
         ageGroup: { 
             type: String, 
-            enum: ['under13','13-17','18-22','23+']
+            enum: ['Under 13','13-17','18-22','23+']
         },
         classLevel: { type: Number }, // 6-12 or 0 for college/professional
         subjects: [{ type: String }],
