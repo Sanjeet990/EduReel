@@ -40,7 +40,7 @@ public interface ApiService {
 
     // Video Routes
     @GET("videos/feed")
-    Call<ApiResponse<List<Video>>> getFeed(@Query("page") int page, @Query("limit") int limit);
+    Call<ApiResponse<List<Video>>> getFeed(@Query("page") int page, @Query("limit") int limit, @Query("t") long timestamp);
 
     @GET("videos/explore")
     Call<ApiResponse<List<Video>>> getExplore(@Query("subject") String subject, @Query("classLevel") String classLevel, @Query("limit") Integer limit, @Query("page") Integer page);

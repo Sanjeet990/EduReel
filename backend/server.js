@@ -21,8 +21,12 @@ app.use('/hls', express.static(path.join(__dirname, 'public/hls'), {
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.m3u8')) {
             res.set('Cache-Control', 'no-cache, no-store');
-        } else {
+            res.set('Content-Type', 'application/vnd.apple.mpegurl');
+        } else if (filePath.endsWith('.m4s')) {
             res.set('Cache-Control', 'public, max-age=31536000'); // segments
+            res.set('Content-Type', 'video/iso.segment');
+        } else {
+            res.set('Cache-Control', 'public, max-age=31536000');
         }
         res.set('Access-Control-Allow-Origin', '*');
     }

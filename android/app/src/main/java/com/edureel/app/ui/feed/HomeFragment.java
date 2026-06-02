@@ -204,7 +204,7 @@ public class HomeFragment extends Fragment {
     private void loadVideos() {
         isLoading = true;
         ApiService apiService = ApiClient.getClient(tokenManager).create(ApiService.class);
-        apiService.getFeed(currentPage, 10).enqueue(new Callback<ApiResponse<List<Video>>>() {
+        apiService.getFeed(currentPage, 10, System.currentTimeMillis()).enqueue(new Callback<ApiResponse<List<Video>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Video>>> call, Response<ApiResponse<List<Video>>> response) {
                 isLoading = false;

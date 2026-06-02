@@ -20,16 +20,14 @@ public class SplashActivity extends AppCompatActivity {
 
         tokenManager = new TokenManager(this);
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            String token = tokenManager.getToken();
+        String token = tokenManager.getToken();
 
-            if (token != null && !token.isEmpty()) {
-                fetchProfileAndRoute();
-            } else {
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
-            }
-        }, 2000); // 2-second delay
+        if (token != null && !token.isEmpty()) {
+            fetchProfileAndRoute();
+        } else {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
     }
 
     private void fetchProfileAndRoute() {
