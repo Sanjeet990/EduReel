@@ -10,15 +10,16 @@ if (!fs.existsSync(hlsBaseDir)) {
 }
 
 const transcode = async (videoId, rawFilePath) => {
-    const outputDir = path.join(hlsBaseDir, videoId).replace(/\\/g, '/');
+    const timestamp = Date.now().toString();
+    const outputDir = path.join(hlsBaseDir, videoId, timestamp).replace(/\\/g, '/');
     if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
     }
 
     const resolutions = [
-        { label: '360p', height: 360, bitrate: '800k' },
-        { label: '720p', height: 720, bitrate: '2500k' },
-        { label: '1080p', height: 1080, bitrate: '5000k' }
+        { label: '240p', height: 240, bitrate: '300k' },
+        { label: '480p', height: 480, bitrate: '1000k' },
+        { label: '720p', height: 720, bitrate: '2500k' }
     ];
 
     try {
@@ -46,7 +47,7 @@ const transcode = async (videoId, rawFilePath) => {
                         '-b:a', '128k',
                         '-maxrate', res.bitrate,
                         '-bufsize', res.bitrate,
-                        '-hls_time', '2',
+                        '-hls_time', '1',
                         '-hls_playlist_type', 'vod',
                         '-hls_segment_type', 'fmp4',
                         '-hls_flags', 'independent_segments',
@@ -56,7 +57,7 @@ const transcode = async (videoId, rawFilePath) => {
                     .on('end', () => {
                         playlists.push({
                             label: res.label,
-                            playlistUrl: `/hls/${videoId}/${res.label}/${playlistName}`
+                            playlistUrl: `/hls/${videoId}/${timestamp}/${res.label}/${playlistName}`
                         });
                         resolve();
                     })
@@ -100,8 +101,8 @@ const transcode = async (videoId, rawFilePath) => {
         // Update DB
         await Video.findByIdAndUpdate(videoId, {
             status: 'ready',
-            hlsUrl: `/hls/${videoId}/master.m3u8`,
-            thumbnailUrl: `/hls/${videoId}/${thumbFilename}`,
+            hlsUrl: `/hls/${videoId}/${timestamp}/master.m3u8`,
+            thumbnailUrl: `/hls/${videoId}/${timestamp}/${thumbFilename}`,
             resolutions: playlists
         });
 
